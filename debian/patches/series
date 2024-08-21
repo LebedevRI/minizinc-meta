@@ -1,0 +1,14 @@
+0001-FindGecode.cmake-fix-handling-of-static-Gecode-w-MPF.patch
+0001-Fix-chuffed-config.cmake.in.patch
+gecode/0001-Drop-.orig-file-that-gets-auto-deleted.patch
+gecode/0002-CMake-improve-handling-of-gecode-test.patch
+libminizinc/0001-PyTest-stub-out-html-output.patch
+libminizinc/0002-PyTest-stub-out-pytest-metadata.patch
+libminizinc/0003-test-globals-float.mzn-does-not-work-with-gecode.patch
+libminizinc/0004-array_intersect_context.mzn-gecode-release-6.3.0-out.patch
+libminizinc/0005-spec-unit-types-alias.mzn-disable-fails-with-asserti.patch
+libminizinc/0006-Disable-some-more-tests-for-gecode-solver.patch
+libminizinc/0007-Expand-testsuite-to-cover-full-set-of-optimization-l.patch
+libminizinc/0008-bug85.mzn-fails-with-internal-chuffed.patch
+minizinc-python/0001-Disable-coin-bc-solver-test-not-built.patch
+pytest-html/0001-Add-PGK-INFO-from-pip-tarball.patch

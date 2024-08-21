@@ -1,0 +1,4 @@
+# The version is correct and is equivalent to the `(= ${binary:Version})`,
+# which we can't use because the binary packages have different versions
+# from that of the source meta-package.
+weak-library-dev-dependency

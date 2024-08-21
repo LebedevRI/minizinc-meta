@@ -1,0 +1,226 @@
+Source: minizinc-meta
+Section: science
+Priority: optional
+Maintainer: Roman Lebedev <lebedev.ri@gmail.com>
+Build-Depends: bison,
+               clang-18,
+               cmake,
+               debhelper-compat (= 13),
+               dh-python,
+               flex,
+               libclang-rt-18-dev,
+               libmpfr-dev,
+               lld-18,
+               llvm-18,
+               ninja-build,
+#               npm,
+               pybuild-plugin-pyproject,
+               python3,
+               python3-all,
+               python3-jsonschema,
+               python3-poetry-core,
+               python3-py,
+               python3-pytest,
+               python3-pytest-instafail,
+               python3-pytest-xdist,
+               python3-yaml,
+               zlib1g-dev
+Standards-Version: 4.7.0
+Homepage: https://www.minizinc.org/
+Rules-Requires-Root: no
+
+Package: chuffed-flatzinc
+Homepage: https://github.com/chuffed/chuffed
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+Description: lazy clause solver (FlatZinc implementation)
+ Chuffed is a state of the art lazy clause solver designed from the ground up
+ with lazy clause generation in mind. Lazy clause generation is a hybrid
+ approach to constraint solving that combines features of finite domain
+ propagation and Boolean satisfiability. Finite domain propagation is
+ instrumented to record the reasons for each propagation step. This creates an
+ implication graph like that built by a SAT solver, which may be used to create
+ efficient nogoods that record the reasons for failure. These nogoods can be
+ propagated efficiently using SAT unit propagation technology. The resulting
+ hybrid system combines some of the advantages of finite domain constraint
+ programming (high level model and programmable search) with some of the
+ advantages of SAT solvers (reduced search by nogood creation, and effective
+ autonomous search using variable activities).
+
+Package: chuffed-minizinc-data
+Homepage: https://github.com/chuffed/chuffed
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: lazy clause solver
+ Chuffed is a state of the art lazy clause solver designed from the ground up
+ with lazy clause generation in mind. Lazy clause generation is a hybrid
+ approach to constraint solving that combines features of finite domain
+ propagation and Boolean satisfiability. Finite domain propagation is
+ instrumented to record the reasons for each propagation step. This creates an
+ implication graph like that built by a SAT solver, which may be used to create
+ efficient nogoods that record the reasons for failure. These nogoods can be
+ propagated efficiently using SAT unit propagation technology. The resulting
+ hybrid system combines some of the advantages of finite domain constraint
+ programming (high level model and programmable search) with some of the
+ advantages of SAT solvers (reduced search by nogood creation, and effective
+ autonomous search using variable activities).
+
+Package: minizinc-solver-chuffed
+Homepage: https://github.com/chuffed/chuffed
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         chuffed-minizinc-data (= ${CHUFFED:VERSION})
+Description: lazy clause solver
+ Chuffed is a state of the art lazy clause solver designed from the ground up
+ with lazy clause generation in mind. Lazy clause generation is a hybrid
+ approach to constraint solving that combines features of finite domain
+ propagation and Boolean satisfiability. Finite domain propagation is
+ instrumented to record the reasons for each propagation step. This creates an
+ implication graph like that built by a SAT solver, which may be used to create
+ efficient nogoods that record the reasons for failure. These nogoods can be
+ propagated efficiently using SAT unit propagation technology. The resulting
+ hybrid system combines some of the advantages of finite domain constraint
+ programming (high level model and programmable search) with some of the
+ advantages of SAT solvers (reduced search by nogood creation, and effective
+ autonomous search using variable activities).
+
+Package: libchuffed-dev
+Homepage: https://github.com/chuffed/chuffed
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         chuffed-minizinc-data (= ${CHUFFED:VERSION}),
+Description: lazy clause solver
+ Chuffed is a state of the art lazy clause solver designed from the ground up
+ with lazy clause generation in mind. Lazy clause generation is a hybrid
+ approach to constraint solving that combines features of finite domain
+ propagation and Boolean satisfiability. Finite domain propagation is
+ instrumented to record the reasons for each propagation step. This creates an
+ implication graph like that built by a SAT solver, which may be used to create
+ efficient nogoods that record the reasons for failure. These nogoods can be
+ propagated efficiently using SAT unit propagation technology. The resulting
+ hybrid system combines some of the advantages of finite domain constraint
+ programming (high level model and programmable search) with some of the
+ advantages of SAT solvers (reduced search by nogood creation, and effective
+ autonomous search using variable activities).
+
+Package: gecode-flatzinc
+Homepage: https://github.com/Gecode/gecode
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+Description: Generic Constraint Development Environment (FlatZinc implementation)
+ Gecode is an open source C++ toolkit for developing constraint-based systems
+ and applications. Gecode provides a constraint solver with state-of-the-art
+ performance while being modular and extensible.
+
+Package: gecode-minizinc-data
+Homepage: https://github.com/Gecode/gecode
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Generic Constraint Development Environment
+ Gecode is an open source C++ toolkit for developing constraint-based systems
+ and applications. Gecode provides a constraint solver with state-of-the-art
+ performance while being modular and extensible.
+
+Package: minizinc-solver-gecode
+Homepage: https://github.com/Gecode/gecode
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         gecode-minizinc-data (= ${CHUFFED:VERSION})
+Description: Generic Constraint Development Environment
+ Gecode is an open source C++ toolkit for developing constraint-based systems
+ and applications. Gecode provides a constraint solver with state-of-the-art
+ performance while being modular and extensible.
+
+Package: libgecode-dev
+Homepage: https://github.com/Gecode/gecode
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         gecode-minizinc-data (= ${CHUFFED:VERSION}),
+Description: Generic Constraint Development Environment
+ Gecode is an open source C++ toolkit for developing constraint-based systems
+ and applications. Gecode provides a constraint solver with state-of-the-art
+ performance while being modular and extensible.
+
+Package: minizinc
+Homepage: https://github.com/MiniZinc/libminizinc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         minizinc-data (= ${MINIZINC:VERSION}),
+Description: free and open-source constraint modelling language.
+ You can use MiniZinc to model constraint satisfaction and optimization
+ problems in a high-level, solver-independent way, taking advantage of a large
+ library of pre-defined constraints. Your model is then compiled into FlatZinc,
+ a solver input language that is understood by a wide range of solvers.
+
+Package: minizinc-data
+Homepage: https://github.com/MiniZinc/libminizinc
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: free and open-source constraint modelling language.
+ You can use MiniZinc to model constraint satisfaction and optimization
+ problems in a high-level, solver-independent way, taking advantage of a large
+ library of pre-defined constraints. Your model is then compiled into FlatZinc,
+ a solver input language that is understood by a wide range of solvers.
+
+Package: minizinc-solver-chuffed-internal
+Homepage: https://github.com/MiniZinc/libminizinc
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         chuffed-minizinc-data (= ${CHUFFED:VERSION})
+Description: free and open-source constraint modelling language.
+ You can use MiniZinc to model constraint satisfaction and optimization
+ problems in a high-level, solver-independent way, taking advantage of a large
+ library of pre-defined constraints. Your model is then compiled into FlatZinc,
+ a solver input language that is understood by a wide range of solvers.
+
+Package: minizinc-solver-gecode-internal
+Homepage: https://github.com/MiniZinc/libminizinc
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         gecode-minizinc-data (= ${CHUFFED:VERSION})
+Description: free and open-source constraint modelling language.
+ You can use MiniZinc to model constraint satisfaction and optimization
+ problems in a high-level, solver-independent way, taking advantage of a large
+ library of pre-defined constraints. Your model is then compiled into FlatZinc,
+ a solver input language that is understood by a wide range of solvers.
+
+Package: libmzn-dev
+Homepage: https://github.com/MiniZinc/libminizinc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+Recommends: minizinc-data (= ${MINIZINC:VERSION}),
+            chuffed-minizinc-data (= ${CHUFFED:VERSION})
+Description: free and open-source constraint modelling language.
+ You can use MiniZinc to model constraint satisfaction and optimization
+ problems in a high-level, solver-independent way, taking advantage of a large
+ library of pre-defined constraints. Your model is then compiled into FlatZinc,
+ a solver input language that is understood by a wide range of solvers.
+
+Package: python3-minizinc
+Homepage: https://github.com/MiniZinc/minizinc-python/
+Section: python
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         python3:any
+Description: free and open-source constraint modelling language.
+ You can use MiniZinc to model constraint satisfaction and optimization
+ problems in a high-level, solver-independent way, taking advantage of a large
+ library of pre-defined constraints. Your model is then compiled into FlatZinc,
+ a solver input language that is understood by a wide range of solvers.
+
+#Package: python3-pytest-html
+#Homepage: https://github.com/pytest-dev/pytest-html
+#Section: python
+#Architecture: any
+#Depends: ${shlibs:Depends}, ${misc:Depends},
+#         python3:any,
+#         python3-pytest
+#Description: plugin for pytest that generates a HTML report for test results
+# pytest-html is a plugin for pytest that generates a HTML report for test results.

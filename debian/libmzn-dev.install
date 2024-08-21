@@ -1,0 +1,3 @@
+usr/include/minizinc/
+usr/lib/*/cmake/libminizinc/
+usr/lib/*/libmzn.a

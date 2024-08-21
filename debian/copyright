@@ -1,0 +1,202 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: minizinc-meta
+
+Files: chuffed/*
+Copyright: 2015-2024 Geoffrey Chu, Peter J. Stuckey, Andreas Schutt, Thorsten Ehlers, Graeme Gange, Kathryn Francis
+License: Expat
+
+Files: chuffed/chuffed/flatzinc/generated_parser/parser.tab.cpp
+ chuffed/chuffed/flatzinc/generated_parser/parser.tab.h
+Copyright: 1984, 1989-1990, 2000-2015, 2018-2021, Free Software Foundation, Inc
+License: GPL-3+ with Bison-2.2 exception
+
+Files: chuffed/thirdparty/MurmurHash3/MurmurHash3.cpp
+ chuffed/thirdparty/MurmurHash3/MurmurHash3.h
+Copyright: NONE
+License: public-domain
+ MurmurHash3 was written by Austin Appleby, and is placed in the public
+ domain. The author hereby disclaims copyright to this source code.
+
+Files: gecode/*
+Copyright: 2005-2024 Christian Schulte, Guido Tack, Mikael Zayenz Lagerkvist, Niko Paltzer, Patrick Pekczynski, Vincent Barichard, Chris Mears, and other contributors.
+License: Expat
+
+Files: gecode/gecode/third-party/boost/*
+Copyright: 2000, Jens Maurer
+  2002, Hervé Brönnimann, Guillaume Melquiond, Sylvain Pion
+  2002-2003, Hervé Brönnimann, Guillaume Melquiond, Sylvain Pion
+License: BSL-1.0
+
+Files: gecode/gecode/flatzinc/parser.tab.cpp
+ gecode/flatzinc/parser.tab.hpp
+Copyright: 1984, 1989-1990, 2000-2015, 2018-2021, Free Software Foundation,
+License: GPL-3+ with Bison-2.2 exception
+
+Files: libminizinc/*
+Copyright: 2007-2024 Guido Tack, Jip J. Dekker, Kevin Leo, Gleb Belov, Jason Nguyen, Maria Garcia de la Banda, Peter J. Stuckey, and other contributors.
+License: MPL-2.0
+
+Files: libminizinc/include/minizinc/_thirdparty/b64/ccommon.h
+ libminizinc/include/minizinc/_thirdparty/b64/cdecode.h
+ libminizinc/include/minizinc/_thirdparty/b64/cencode.h
+ libminizinc/include/minizinc/_thirdparty/b64/decode.h
+ libminizinc/include/minizinc/_thirdparty/b64/encode.h
+ libminizinc/lib/thirdparty/cdecode.c
+ libminizinc/lib/thirdparty/cencode.c
+Copyright: NONE
+License: public-domain
+ This is part of the libb64 project, and has been placed in the public domain.
+ For details, see http://sourceforge.net/projects/libb64
+
+Files: libminizinc/lib/cached/minizinc/parser.tab.hh
+ libminizinc/lib/cached/minizinc/support/regex_parser.tab.hh
+ libminizinc/lib/cached/parser.tab.cpp
+ libminizinc/lib/cached/regex_parser.tab.cpp
+Copyright: 1984, 1989-1990, 2000-2015, 2018-2021, Free Software Foundation, Inc
+License: GPL-3+ with Bison-2.2 exception
+
+Files: libminizinc/lib/thirdparty/miniz.c
+Copyright: 2010-2014, Rich Geldreich and Tenacious Software LLC
+  2013-2014, RAD Game Tools and Valve Software
+  2016, Martin Raiber
+License: Expat
+
+Files: libminizinc/docs/utils/sphinxtogithub.py
+Copyright: 2009, Michael Jones
+License: BSD-3-clause
+ // BSD licence, modified to remove the organisation as there isn't one.
+ .
+ Copyright (c) 2009, Michael Jones
+ All rights reserved.
+ .
+ Redistribution and use in source and binary forms, with or without modification,
+ are permitted provided that the following conditions are met:
+ .
+   * Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+   * The names of its contributors may not be used to endorse or promote
+     products derived from this software without specific prior written
+     permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Files: minizinc-python/*
+Copyright: 2019-2024 Guido Tack, Jip J. Dekker, Kevin Leo, Gleb Belov, Jason Nguyen, Maria Garcia de la Banda, Peter J. Stuckey, and other contributors.
+License: MPL-2.0
+
+Files: debian/*
+ README.md
+ .gitmodules
+Copyright: 2024 Roman Lebedev <lebedev.ri@gmail.com>
+License: GPL-2+
+
+License: MPL-2.0
+ On Debian systems, the complete text of the Mozilla Public License Version 2.0
+ can be found in "/usr/share/common-licenses/MPL-2.0".
+
+License: GPL-2+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
+
+License: Expat
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+
+License: GPL-3+ with Bison-2.2 exception
+ A Bison parser, made by GNU Bison 3.8.2.
+ .
+ Bison implementation for Yacc-like parsers in C
+ .
+ Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+ Inc.
+ .
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ .
+ As a special exception, you may create a larger work that contains
+ part or all of the Bison parser skeleton and distribute that work
+ under terms of your choice, so long as that work isn't itself a
+ parser generator using the skeleton or a modified version thereof
+ as a parser skeleton.  Alternatively, if you modify or redistribute
+ the parser skeleton itself, you may (at your option) remove this
+ special exception, which will cause the skeleton and the resulting
+ Bison output files to be licensed under the GNU General Public
+ License without this special exception.
+ .
+ This special exception was added by the Free Software Foundation in
+ version 2.2 of Bison.
+
+License: BSL-1.0
+ Boost Software License - Version 1.0 - August 17th, 2003
+ .
+ Permission is hereby granted, free of charge, to any person or organization
+ obtaining a copy of the software and accompanying documentation covered by
+ this license (the "Software") to use, reproduce, display, distribute,
+ execute, and transmit the Software, and to prepare derivative works of the
+ Software, and to permit third-parties to whom the Software is furnished to
+ do so, all subject to the following:
+ .
+ The copyright notices in the Software and this entire statement, including
+ the above license grant, this restriction and the following disclaimer,
+ must be included in all copies of the Software, in whole or in part, and
+ all derivative works of the Software, unless such copies or derivative
+ works are solely in the form of machine-executable object code generated by
+ a source language processor.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+ SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+ FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ DEALINGS IN THE SOFTWARE.

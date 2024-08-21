@@ -1,0 +1,40 @@
+From 2249e1dd3972c3c99edf3723517860f9c6cebf9f Mon Sep 17 00:00:00 2001
+From: Roman Lebedev <lebedev.ri@gmail.com>
+Date: Fri, 23 Aug 2024 04:24:14 +0300
+Subject: [PATCH 2/2] CMake: improve handling of `gecode-test`
+
+Ensure that it gets built when testing is enabled,
+and that CMake actually uses said executable target,
+and not some binary.
+
+diff --git a/gecode/CMakeLists.txt b/gecode/CMakeLists.txt
+index 3f7803ec3..9270b0c76 100644
+--- a/gecode/CMakeLists.txt
++++ b/gecode/CMakeLists.txt
+@@ -389,6 +389,7 @@ if (FLOATSRC)
+ endif ()
+ 
+ add_executable(gecode-test EXCLUDE_FROM_ALL ${TESTSRC} ${TESTHDR})
++set_target_properties(gecode-test PROPERTIES EXCLUDE_FROM_ALL $<NOT:$<BOOL:${BUILD_TESTING}>>)
+ target_link_libraries(gecode-test gecodeflatzinc gecodeminimodel)
+ 
+ add_executable(fzn-gecode ${FLATZINCEXESRC})
+@@ -428,13 +429,13 @@ endif()
+ 
+ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+ 
+-option(BUILD_EXAMPLES "Build examples." OFF) 
++option(BUILD_EXAMPLES "Build examples." OFF)
+ if (${BUILD_EXAMPLES})
+   add_subdirectory(examples)
+ endif()
+ 
+ enable_testing()
+-add_test(test gecode-test
++add_test(NAME test COMMAND gecode-test
+   -iter 2 -test Branch::Int::Dense::3
+   -test Int::Linear::Int::Int::Eq::Bnd::12::4
+   -test Int::Distinct::Random
+-- 
+2.45.2
+

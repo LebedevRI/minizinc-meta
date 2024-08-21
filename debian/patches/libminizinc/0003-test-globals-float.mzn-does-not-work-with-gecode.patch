@@ -1,0 +1,23 @@
+From daf6cebb187b0a0e6ee6387115c4363322c1ce54 Mon Sep 17 00:00:00 2001
+From: Roman Lebedev <lebedev.ri@gmail.com>
+Date: Thu, 22 Aug 2024 23:47:37 +0300
+Subject: [PATCH 3/8] `test-globals-float.mzn`: does not work with gecode
+
+See https://github.com/MiniZinc/libminizinc/issues/835
+See https://github.com/Gecode/gecode/issues/199
+
+diff --git a/libminizinc/tests/spec/unit/test-globals-float.mzn b/libminizinc/tests/spec/unit/test-globals-float.mzn
+index bb3bb1874..8b7e2b209 100644
+--- a/libminizinc/tests/spec/unit/test-globals-float.mzn
++++ b/libminizinc/tests/spec/unit/test-globals-float.mzn
+@@ -1,6 +1,6 @@
+ /***
+ !Test
+-solvers: [gecode, cbc, highs]
++solvers: [cbc, highs]
+ expected:
+ - !Result
+   solution: !Solution
+-- 
+2.45.2
+

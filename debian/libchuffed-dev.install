@@ -1,0 +1,4 @@
+usr/include/chuffed/
+usr/lib/*/cmake/chuffed/
+usr/lib/*/libchuffed.a
+usr/lib/*/libchuffed_fzn.a

@@ -1,0 +1,15 @@
+[submodule "libminizinc"]
+	path = libminizinc
+	url = ./
+[submodule "minizinc-python"]
+	path = minizinc-python
+	url = ./
+[submodule "chuffed"]
+	path = chuffed
+	url = ./
+[submodule "gecode"]
+	path = gecode
+	url = ./
+[submodule "pytest-html"]
+	path = pytest-html
+	url = ./

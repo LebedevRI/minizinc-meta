@@ -1,0 +1,128 @@
+From b4059316f66c709ae09892b5cdb809ba187f0911 Mon Sep 17 00:00:00 2001
+From: Roman Lebedev <lebedev.ri@gmail.com>
+Date: Thu, 22 Aug 2024 09:02:35 +0300
+Subject: [PATCH 1/8] PyTest: stub out html output
+
+Debian does not package python3-pytest-html,
+and i'm not yet sure how to do that.
+
+diff --git a/libminizinc/tests/conftest.py b/libminizinc/tests/conftest.py
+index 99b06cc84..5a5a2d714 100644
+--- a/libminizinc/tests/conftest.py
++++ b/libminizinc/tests/conftest.py
+@@ -6,7 +6,7 @@ import pytest
+ # pylint: disable=import-error,no-name-in-module
+ from py.xml import html
+ from html import escape
+-import pytest_html
++# import pytest_html
+ import re
+ import minizinc as mzn
+ from difflib import HtmlDiff
+@@ -53,51 +53,51 @@ def pytest_collect_file(parent, file_path):
+         return MznFile.from_parent(parent, path=file_path)
+ 
+ 
+-def pytest_html_results_table_header(cells):
+-    cells.insert(2, html.th("Solver", class_="sortable", col="solver"))
+-    cells.insert(3, html.th("Checker", class_="sortable", col="checker"))
+-    cells.pop()
++# def pytest_html_results_table_header(cells):
++#     cells.insert(2, html.th("Solver", class_="sortable", col="solver"))
++#     cells.insert(3, html.th("Checker", class_="sortable", col="checker"))
++#     cells.pop()
+ 
+ 
+-def pytest_html_results_table_row(report, cells):
+-    if hasattr(report, "user_properties"):
+-        props = {k: v for k, v in report.user_properties}
+-        cells.insert(2, html.td(props.get("solver", "-")))
+-        cells.insert(3, html.td(props.get("checker", "-")))
+-    cells.pop()
++# def pytest_html_results_table_row(report, cells):
++#     if hasattr(report, "user_properties"):
++#         props = {k: v for k, v in report.user_properties}
++#         cells.insert(2, html.td(props.get("solver", "-")))
++#         cells.insert(3, html.td(props.get("checker", "-")))
++#     cells.pop()
+ 
+ 
+-@pytest.hookimpl(hookwrapper=True)
+-def pytest_runtest_makereport(item, call):
+-    outcome = yield
+-    report = outcome.get_result()
+-    extra = getattr(report, "extra", [])
+-    if report.when == "call" and report.outcome != "skipped":
+-        props = {k: v for k, v in report.user_properties}
+-        if "compare" in props:
+-            required, obtained = props["compare"]
+-            html_content = """
+-                <button class="copy-button" onclick="this.nextElementSibling.select();document.execCommand('copy');this.textContent = 'Copied!';">Copy obtained output to clipboard</button>
+-                <textarea class="hidden-textarea" readonly>{}</textarea>
+-            """.format(
+-                escape(obtained)
+-            )
+-            actual = obtained.split("\n")
+-            htmldiff = HtmlDiff(2)
+-            html_content += '<h4>Diffs</h4><div class="diffs">'
+-            html_content += "<hr>".join(
+-                htmldiff.make_table(
+-                    expected.split("\n"),
+-                    actual,
+-                    fromdesc="expected",
+-                    todesc="actual",
+-                    context=True,
+-                )
+-                for expected in required
+-            )
+-            html_content += "</div>"
+-            extra.append(pytest_html.extras.html(html_content))
+-        report.extra = extra
++# @pytest.hookimpl(hookwrapper=True)
++# def pytest_runtest_makereport(item, call):
++#     outcome = yield
++#     report = outcome.get_result()
++#     extra = getattr(report, "extra", [])
++#     if report.when == "call" and report.outcome != "skipped":
++#         props = {k: v for k, v in report.user_properties}
++#         if "compare" in props:
++#             required, obtained = props["compare"]
++#             html_content = """
++#                 <button class="copy-button" onclick="this.nextElementSibling.select();document.execCommand('copy');this.textContent = 'Copied!';">Copy obtained output to clipboard</button>
++#                 <textarea class="hidden-textarea" readonly>{}</textarea>
++#             """.format(
++#                 escape(obtained)
++#             )
++#             actual = obtained.split("\n")
++#             htmldiff = HtmlDiff(2)
++#             html_content += '<h4>Diffs</h4><div class="diffs">'
++#             html_content += "<hr>".join(
++#                 htmldiff.make_table(
++#                     expected.split("\n"),
++#                     actual,
++#                     fromdesc="expected",
++#                     todesc="actual",
++#                     context=True,
++#                 )
++#                 for expected in required
++#             )
++#             html_content += "</div>"
++#             extra.append(pytest_html.extras.html(html_content))
++#         report.extra = extra
+ 
+ 
+ def pytest_metadata(metadata):
+diff --git a/libminizinc/tests/pytest.ini b/libminizinc/tests/pytest.ini
+index 3db599d9a..b00a2a749 100644
+--- a/libminizinc/tests/pytest.ini
++++ b/libminizinc/tests/pytest.ini
+@@ -1,5 +1,5 @@
+ [pytest]
+-addopts = --tb=short --html=output/report.html --css=style.css --junitxml=output/junit.xml -n auto --instafail --dist=loadfile -rs
++addopts = --tb=short --junitxml=output/junit.xml -n auto --instafail --dist=loadfile -rs
+ junit_family = xunit2
+ junit_suite_name = minizinc
+ junit_logging = system-err
+-- 
+2.45.2
+

@@ -1,0 +1,27 @@
+From 97142e08ff28f9d2e9f80b826bfbd38d917c6bf5 Mon Sep 17 00:00:00 2001
+From: Roman Lebedev <lebedev.ri@gmail.com>
+Date: Thu, 22 Aug 2024 20:48:17 +0300
+Subject: [PATCH] Disable `coin-bc` solver test -- not built
+
+
+diff --git a/minizinc-python/tests/test_solver.py b/minizinc-python/tests/test_solver.py
+index 8a0725cdc..5623f40c7 100644
+--- a/minizinc-python/tests/test_solver.py
++++ b/minizinc-python/tests/test_solver.py
+@@ -19,8 +19,8 @@ def test_chuffed():
+     assert chuffed.executable.endswith("fzn-chuffed")
+ 
+ 
+-def test_coinbc():
+-    coinbc = Solver.lookup("coin-bc")
+-    assert coinbc is not None
+-    assert coinbc.id.endswith("coin-bc")
+-    assert coinbc.executable is None
++# def test_coinbc():
++#     coinbc = Solver.lookup("coin-bc")
++#     assert coinbc is not None
++#     assert coinbc.id.endswith("coin-bc")
++#     assert coinbc.executable is None
+-- 
+2.45.2
+

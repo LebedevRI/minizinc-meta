@@ -1,0 +1,5 @@
+minizinc-meta (1.0.0-mzn1) unstable; urgency=medium
+
+  * Initial minizinc meta package
+
+ -- Roman Lebedev <lebedev.ri@gmail.com>  Tue, 20 Aug 2024 00:51:09 +0300

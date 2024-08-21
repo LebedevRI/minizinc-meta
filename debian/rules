@@ -1,0 +1,373 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/architecture.mk
+include /usr/share/dpkg/pkg-info.mk
+
+export DH_VERBOSE=1
+
+NUMJOBS = 1
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    MAKEFLAGS += -j$(NUMJOBS)
+endif
+
+PYTHON3_VERSION = $(shell py3versions --default)
+
+export PYBUILD_NAME=minizinc
+
+export CHUFFED_VERSION = 0.13.2
+export GECODE_VERSION = 6.2.0~git20240315.f7f0d7c27
+export MINIZINC_VERSION = 2.8.5
+export MINIZINC_PYTHON_VERSION = 0.9.0
+export PYTHON3_PYTEST_HTML_VERSION = 4.1.1
+# this needs to also support updates and ubuntu versions, e.g.:
+# - x.y.z+11+deb10u1
+# - x.y.z+10~18.04.2
+DEB_REVISION = $(shell echo $(DEB_VERSION) | sed -E 's,.+\+([0-9]+([~+][a-z0-9.]+)?),\1,')
+
+export CHUFFED_DEB_VERSION = $(CHUFFED_VERSION)+$(DEB_REVISION)
+export GECODE_DEB_VERSION = $(GECODE_VERSION)+$(DEB_REVISION)
+export MINIZINC_DEB_VERSION = $(MINIZINC_VERSION)+$(DEB_REVISION)
+export MINIZINC_PYTHON_DEB_VERSION = $(MINIZINC_PYTHON_VERSION)+$(DEB_REVISION)
+export PYTHON3_PYTEST_HTML_DEB_VERSION = $(PYTHON3_PYTEST_HTML_VERSION)+$(DEB_REVISION)
+
+CHUFFED_BINARY_PACKAGES = chuffed-flatzinc chuffed-minizinc-data minizinc-solver-chuffed libchuffed-dev
+GECODE_BINARY_PACKAGES = gecode-flatzinc gecode-minizinc-data minizinc-solver-gecode libgecode-dev
+MINIZINC_BINARY_PACKAGES = minizinc minizinc-data minizinc-solver-chuffed-internal minizinc-solver-gecode-internal libmzn-dev
+MINIZINC_PYTHON_BINARY_PACKAGES = python3-minizinc
+PYTHON3_PYTEST_HTML_BINARY_PACKAGES = python3-pytest-html
+
+SUBSTVARS =
+SUBSTVARS += -VCHUFFED:VERSION='$(CHUFFED_DEB_VERSION)'
+SUBSTVARS += -VGECODE:VERSION='$(GECODE_DEB_VERSION)'
+SUBSTVARS += -VMINIZINC:VERSION='$(MINIZINC_DEB_VERSION)'
+
+# We do not care about distro's LTO preferences.
+DEB_BUILD_MAINT_OPTIONS += optimize=-lto
+
+LLVM_VERSION = 18
+
+WITH_LTO = OFF
+WITH_TESTS = ON
+WITH_PGO = OFF
+WITH_LLD = ON
+
+ifeq ($(DEB_HOST_ARCH),amd64)
+# 	WITH_LTO = ON
+# 	WITH_PGO = ON
+endif
+
+ifneq (,$(filter nolto,$(DEB_BUILD_OPTIONS)))
+	# Respect nolto.
+	WITH_LTO = OFF
+endif
+
+ifneq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	# Respect nocheck.
+	WITH_TESTS = OFF
+	# If we aren't allowed to run tests, then certainly no PGO either.
+	WITH_PGO = OFF
+endif
+
+ifneq (,$(filter nopgo,$(DEB_BUILD_OPTIONS)))
+	# Respect nopgo.
+	WITH_PGO = OFF
+endif
+
+export CC = clang-$(LLVM_VERSION)
+export CXX = clang++-$(LLVM_VERSION)
+
+BUILDSPACE = $(SOURCE_DIR)-build
+
+BUILD_STAGE ?= 2
+STAGE_COMPILE_FLAGS ?=
+
+# We do want some debug info, but use compressed split dwarf.
+_CFLAGS += -g -gz -gsplit-dwarf
+_LDFLAGS += -Wl,--gdb-index
+
+# _CFLAGS += -O1
+_CFLAGS += -O2
+# _CFLAGS += -O3
+_CFLAGS += -UNDEBUG
+# _CFLAGS += -DNDEBUG
+_CFLAGS += $(STAGE_COMPILE_FLAGS)
+
+ifneq ($(WITH_LLD),OFF)
+	_LDFLAGS += -fuse-ld=lld-$(LLVM_VERSION) -Wl,--build-id=sha1
+endif
+
+export CFLAGS = $(_CFLAGS)
+export LDFLAGS = $(_LDFLAGS)
+export CXXFLAGS = $(CFLAGS)
+
+ifneq (1,$(NUMJOBS))
+    NUM_PROFILE_FILES = $(shell echo $$((2 * $(NUMJOBS))))
+else
+    NUM_PROFILE_FILES = 1
+endif
+
+PROFILE_DIR = $(BUILDSPACE)/profile
+PROFILE_TMP_DIR = $(PROFILE_DIR)/raw
+PROFILE = $(PROFILE_DIR)/default.profdata
+
+BUILD_DIR_PREFIX = $(BUILDSPACE)/build
+
+STAGE_BUILD_DIR_PREFIX = $(BUILD_DIR_PREFIX)/stage-$(BUILD_STAGE)
+BUILD_DIR = $(STAGE_BUILD_DIR_PREFIX)/minizinc-meta
+INSTALL_DIR = $(STAGE_BUILD_DIR_PREFIX)/minizinc-meta-install
+
+define merge-separate-install-prefix =
+cp -a --backup=simple --suffix=~CLOBBER $(INSTALL_DIR)/staging/* $(INSTALL_DIR)/
+rm -rf $(INSTALL_DIR)/staging
+find $(INSTALL_DIR)/ -name \*~CLOBBER -print -exec /bin/false '{}' +
+endef
+
+%:
+	ENTRY_MAKE_TARGET="$(@)" SOURCE_DIR="$(CURDIR)" dh $@ --with python3 --buildsystem=cmake+ninja
+
+perform_stage_build_chuffed:
+	dh_auto_configure --sourcedir=$(SOURCE_DIR)/chuffed --builddir=$(BUILD_DIR)/chuffed -- \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_C_FLAGS="$(CFLAGS)" \
+	-DCMAKE_C_FLAGS_RELEASE="$(CFLAGS)" \
+	-DCMAKE_CXX_FLAGS="$(CXXFLAGS)" \
+	-DCMAKE_CXX_FLAGS_RELEASE="$(CXXFLAGS)" \
+	-DBUILD_SHARED_LIBS=OFF \
+	-DCMAKE_POLICY_DEFAULT_CMP0069=NEW \
+	-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=$(WITH_LTO) \
+	-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+	-DCMAKE_C_VISIBILITY_PRESET=hidden \
+	-DCMAKE_CXX_VISIBILITY_PRESET=hidden \
+	-DCMAKE_VISIBILITY_INLINES_HIDDEN=ON
+
+	dh_auto_build --builddir=$(BUILD_DIR)/chuffed
+
+	# Remove files that won't be needed anymore.
+	# This reduces the total amount of disk space used during build.
+	# NOTE: we must spare the static libraries that were intentionally created by the build system!
+	find $(BUILD_DIR) \( -name '*.o' -or -name '*.a' \) -not -name 'libchuffed.a' -not -name 'libchuffed_fzn.a' -delete
+
+	dh_auto_install --builddir=$(BUILD_DIR)/chuffed --destdir=$(INSTALL_DIR)/staging
+
+	# Remove the whole build directory. We no longer need it.
+	rm -rf $(BUILD_DIR)
+
+perform_stage_build_gecode:
+	dh_auto_configure --sourcedir=$(SOURCE_DIR)/gecode --builddir=$(BUILD_DIR)/gecode -- \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_C_FLAGS="$(CFLAGS)" \
+	-DCMAKE_C_FLAGS_RELEASE="$(CFLAGS)" \
+	-DCMAKE_CXX_FLAGS="$(CXXFLAGS)" \
+	-DCMAKE_CXX_FLAGS_RELEASE="$(CXXFLAGS)" \
+	-DBUILD_SHARED_LIBS=OFF \
+	-DCMAKE_POLICY_DEFAULT_CMP0069=NEW \
+	-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=$(WITH_LTO) \
+	-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+	-DCMAKE_C_VISIBILITY_PRESET=hidden \
+	-DCMAKE_CXX_VISIBILITY_PRESET=hidden \
+	-DCMAKE_VISIBILITY_INLINES_HIDDEN=ON \
+	-DBUILD_TESTING=OFF
+
+	dh_auto_build --builddir=$(BUILD_DIR)/gecode
+
+# ifneq ($(WITH_TESTS),OFF)
+	# NOTE: test suite is broken: https://github.com/Gecode/gecode/issues/200
+# 	dh_auto_test --sourcedir=$(SOURCE_DIR)/gecode --builddir=$(BUILD_DIR)/gecode -- -j1
+# endif
+
+	# Remove files that won't be needed anymore.
+	# This reduces the total amount of disk space used during build.
+	# NOTE: we must spare the static libraries that were intentionally created by the build system!
+	find $(BUILD_DIR) \( -name '*.o' -or -name '*.a' \) -not -name 'libgecode*.a' -delete
+
+	dh_auto_install --builddir=$(BUILD_DIR)/gecode --destdir=$(INSTALL_DIR)/staging
+
+	# Remove the whole build directory. We no longer need it.
+	rm -rf $(BUILD_DIR)
+
+perform_stage_build_minizinc:
+	dh_auto_configure --sourcedir=$(SOURCE_DIR)/libminizinc --builddir=$(BUILD_DIR)/libminizinc -- \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_C_FLAGS="$(CFLAGS)" \
+	-DCMAKE_C_FLAGS_RELEASE="$(CFLAGS)" \
+	-DCMAKE_CXX_FLAGS="$(CXXFLAGS)" \
+	-DCMAKE_CXX_FLAGS_RELEASE="$(CXXFLAGS)" \
+	-DBUILD_SHARED_LIBS=OFF \
+	-DCMAKE_POLICY_DEFAULT_CMP0069=NEW \
+	-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=$(WITH_LTO) \
+	-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+	-DCMAKE_C_VISIBILITY_PRESET=hidden \
+	-DCMAKE_CXX_VISIBILITY_PRESET=hidden \
+	-DCMAKE_VISIBILITY_INLINES_HIDDEN=ON \
+	-Dchuffed_DIR=$(INSTALL_DIR)/usr/lib/$(DEB_HOST_MULTIARCH)/cmake/chuffed/ \
+	-DGecode_ROOT=$(INSTALL_DIR)/usr/
+
+	dh_auto_build --builddir=$(BUILD_DIR)/libminizinc
+
+	# Remove files that won't be needed anymore.
+	# This reduces the total amount of disk space used during build.
+	# NOTE: we must spare the static libraries that were intentionally created by the build system!
+	find $(BUILD_DIR) \( -name '*.o' -or -name '*.a' \) -not -name 'libmzn.a' -delete
+
+	dh_auto_install --builddir=$(BUILD_DIR)/libminizinc --destdir=$(INSTALL_DIR)/staging
+
+	cat $(INSTALL_DIR)/usr/share/minizinc/solvers/gecode.msc | \
+		sed 's/"org.gecode.gecode"/"org.minizinc.gecode_presolver"/' | \
+		sed 's/"executable"/"_executable"/' | \
+		sed 's/"-Ggecode"/"-Ggecode_presolver"/' > \
+		$(INSTALL_DIR)/staging/usr/share/minizinc/solvers/gecode_internal.msc
+
+	# Remove the whole build directory. We no longer need it.
+	rm -rf $(BUILD_DIR)
+
+test_minizinc_internal_late:
+ifneq ($(WITH_TESTS),OFF)
+	# Many test failures when using gecode_presolver,
+	# so still use external gecode.
+	for b in fzn-chuffed mzn-gecode; do \
+		mv $(INSTALL_DIR)/usr/bin/$$b $(INSTALL_DIR)/usr/bin/$$b.old;  \
+	done
+	mkdir $(INSTALL_DIR)/usr/share/minizinc/solvers-orig
+	mv $(INSTALL_DIR)/usr/share/minizinc/solvers/* $(INSTALL_DIR)/usr/share/minizinc/solvers-orig/
+	cp $(INSTALL_DIR)/usr/share/minizinc/solvers-orig/chuffed_internal.msc $(INSTALL_DIR)/usr/share/minizinc/solvers/
+# 	cp $(INSTALL_DIR)/usr/share/minizinc/solvers-orig/gecode_internal.msc $(INSTALL_DIR)/usr/share/minizinc/solvers/
+	cp $(INSTALL_DIR)/usr/share/minizinc/solvers-orig/gecode.msc $(INSTALL_DIR)/usr/share/minizinc/solvers/
+# 	sed -i 's/"tags": \[/"tags": \["gecode", /' $(INSTALL_DIR)/usr/share/minizinc/solvers/gecode_internal.msc
+	cd $(SOURCE_DIR)/libminizinc/tests/; HOME=$(BUILD_DIR)/tmphome PATH="$(PATH):$(INSTALL_DIR)/usr/bin" PYTHONPATH="$(PYTHONPATH):$(INSTALL_DIR)/usr/lib/$(PYTHON3_VERSION)/dist-packages/" pytest --all-suites --solvers chuffed,gecode -n 1
+	rm -rf $(INSTALL_DIR)/usr/share/minizinc/solvers/
+	mv $(INSTALL_DIR)/usr/share/minizinc/solvers-orig $(INSTALL_DIR)/usr/share/minizinc/solvers
+	for b in fzn-chuffed mzn-gecode; do \
+		mv $(INSTALL_DIR)/usr/bin/$$b.old $(INSTALL_DIR)/usr/bin/$$b;  \
+	done
+endif
+
+# NOTE: this runs after perform_stage_build_minizinc_python!
+test_minizinc_normal_late:
+ifneq ($(WITH_TESTS),OFF)
+	cd $(SOURCE_DIR)/libminizinc/tests/; PATH="$(PATH):$(INSTALL_DIR)/usr/bin" PYTHONPATH="$(PYTHONPATH):$(INSTALL_DIR)/usr/lib/$(PYTHON3_VERSION)/dist-packages/" pytest --all-suites --solvers chuffed,gecode -n 1
+endif
+
+# NOTE: this runs after perform_stage_build_minizinc_python!
+test_minizinc_late:
+ifneq ($(WITH_TESTS),OFF)
+	$(MAKE) -f debian/rules test_minizinc_internal_late
+	$(MAKE) -f debian/rules test_minizinc_normal_late
+endif
+
+perform_stage_build_minizinc_python:
+	dh_auto_configure --buildsystem=pybuild --sourcedir=$(SOURCE_DIR)/minizinc-python
+	dh_auto_build     --buildsystem=pybuild --sourcedir=$(SOURCE_DIR)/minizinc-python
+	dh_auto_install   --buildsystem=pybuild --sourcedir=$(SOURCE_DIR)/minizinc-python --destdir=$(INSTALL_DIR)/staging
+ifneq ($(WITH_TESTS),OFF)
+	PATH="$(PATH):$(INSTALL_DIR)/usr/bin" dh_auto_test --buildsystem=pybuild --sourcedir=$(SOURCE_DIR)/minizinc-python
+endif
+
+	# Remove the whole build directory. We no longer need it.
+	rm -rf $(BUILD_DIR) $(SOURCE_DIR)/.pybuild/
+
+# perform_stage_build_python3_pytest_html:
+# 	dh_auto_configure --buildsystem=pybuild --sourcedir=$(SOURCE_DIR)/pytest-html
+# 	dh_auto_build     --buildsystem=pybuild --sourcedir=$(SOURCE_DIR)/pytest-html
+# 	dh_auto_install   --buildsystem=pybuild --sourcedir=$(SOURCE_DIR)/pytest-html --destdir=$(INSTALL_DIR)/staging
+# 	dh_auto_test      --buildsystem=pybuild --sourcedir=$(SOURCE_DIR)/pytest-html
+#
+# 	# Remove the whole build directory. We no longer need it.
+# 	rm -rf $(BUILD_DIR)
+
+perform_stage_build_impl:
+	$(MAKE) -f debian/rules perform_stage_build_chuffed
+	$(merge-separate-install-prefix)
+	$(MAKE) -f debian/rules perform_stage_build_gecode
+	$(merge-separate-install-prefix)
+	$(MAKE) -f debian/rules perform_stage_build_minizinc
+	$(merge-separate-install-prefix)
+# 	$(MAKE) -f debian/rules perform_stage_build_python3_pytest_html
+# 	$(merge-separate-install-prefix)
+	$(MAKE) -f debian/rules perform_stage_build_minizinc_python
+	$(merge-separate-install-prefix)
+	$(MAKE) -f debian/rules test_minizinc_late
+
+perform_stage_build:
+	LLVM_PROFILE_FILE="$(PROFILE_TMP_DIR)/stage-$(BUILD_STAGE)-%$(NUM_PROFILE_FILES)m.profraw" $(MAKE) -f debian/rules perform_stage_build_impl
+
+override_dh_auto_configure:
+	# Nothing to do. Because of multi-stage build, everything happens in override_dh_auto_build.
+
+perform_multistage_build:
+ifneq ($(WITH_PGO),OFF)
+	BUILD_STAGE=0 STAGE_COMPILE_FLAGS="-fprofile-generate -fprofile-update=atomic -Xclang -mllvm -Xclang -vp-counters-per-site=10.0" $(MAKE) -f debian/rules perform_stage_build
+	rm -rf $(BUILD_DIR_PREFIX)
+	llvm-profdata-$(LLVM_VERSION) merge -output=$(PROFILE) $(PROFILE_TMP_DIR)
+	rm -rf $(PROFILE_TMP_DIR)
+
+	BUILD_STAGE=1 STAGE_COMPILE_FLAGS="-fprofile-use=$(PROFILE) -fcs-profile-generate -fprofile-update=atomic -Xclang -mllvm -Xclang -vp-counters-per-site=100.0" $(MAKE) -f debian/rules perform_stage_build
+	rm -rf $(BUILD_DIR_PREFIX)
+	mv $(PROFILE) $(PROFILE).old
+	llvm-profdata-$(LLVM_VERSION) merge -output=$(PROFILE) $(PROFILE_TMP_DIR) $(PROFILE).old
+	rm -rf $(PROFILE_TMP_DIR)
+	rm -rf $(PROFILE).old
+
+	STAGE_COMPILE_FLAGS="-fprofile-use=$(PROFILE)" $(MAKE) -f debian/rules perform_stage_build
+else
+	$(MAKE) -f debian/rules perform_stage_build
+endif
+
+override_dh_auto_build:
+ifeq ("$(ENTRY_MAKE_TARGET)","binary-indep")
+	DEB_BUILD_OPTIONS="$(DEB_BUILD_OPTIONS) nolto nopgo nocheck" $(MAKE) -f debian/rules perform_multistage_build
+else
+	$(MAKE) -f debian/rules perform_multistage_build
+endif
+
+override_dh_auto_test:
+	# Nothing to do. Because of multi-stage build, everything happens in override_dh_auto_build.
+
+override_dh_auto_install:
+	# We've already merge per-submodule install prefixes.
+	# Verify there were no clobbers.
+	find $(INSTALL_DIR)/ -name \*~CLOBBER -print -exec /bin/false '{}' +
+	# We do not want to install this directory, it is a carbon copy of `usr/share/minizinc/chuffed/`
+	rm -rf $(INSTALL_DIR)/usr/share/minizinc/chuffed_internal/
+
+override_dh_install:
+	dh_install --sourcedir=$(INSTALL_DIR)
+
+override_dh_missing:
+	dh_missing --sourcedir=$(INSTALL_DIR) --fail-missing
+
+override_dh_dwz:
+	# Skipping DWZ.
+
+override_dh_strip:
+	# Use LLVM strip.
+	mkdir -p $(BUILDSPACE)/bin/
+	ln -s /usr/bin/llvm-strip-$(LLVM_VERSION) $(BUILDSPACE)/bin/strip
+	PATH="$(BUILDSPACE)/bin/:$(PATH)" dh_strip -X'.a'
+
+override_dh_gencontrol:
+	for p in $(CHUFFED_BINARY_PACKAGES); do                                \
+		dh_gencontrol -p$$p -- -v$(CHUFFED_DEB_VERSION) $(SUBSTVARS);  \
+	done
+	for p in $(GECODE_BINARY_PACKAGES); do                                 \
+		dh_gencontrol -p$$p -- -v$(GECODE_DEB_VERSION) $(SUBSTVARS);   \
+	done
+	for p in $(MINIZINC_BINARY_PACKAGES); do                               \
+		dh_gencontrol -p$$p -- -v$(MINIZINC_DEB_VERSION) $(SUBSTVARS); \
+	done
+# 	for p in $(PYTHON3_PYTEST_HTML_BINARY_PACKAGES); do                    \
+# 		dh_gencontrol -p$$p -- -v$(PYTHON3_PYTEST_HTML_DEB_VERSION) $(SUBSTVARS); \
+# 	done
+	for p in $(MINIZINC_PYTHON_BINARY_PACKAGES); do                        \
+		dh_gencontrol -p$$p -- -v$(MINIZINC_PYTHON_DEB_VERSION) $(SUBSTVARS); \
+	done
+
+test_parsing_DEB_REVISION:
+	test "$(expected_DEB_REVISION)" = "$(DEB_REVISION)"
+
+override_dh_builddeb:
+	dh_builddeb -- --uniform-compression --compression=xz --compression-level=9 --compression-strategy=extreme
+
+override_dh_clean:
+	dh_clean
+	rm -rf $(BUILDSPACE)

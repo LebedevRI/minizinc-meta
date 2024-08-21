@@ -1,0 +1,41 @@
+From cab8189cce3a2786c864fc9654e595e3022e0796 Mon Sep 17 00:00:00 2001
+From: Roman Lebedev <lebedev.ri@gmail.com>
+Date: Thu, 22 Aug 2024 05:41:08 +0300
+Subject: [PATCH] `FindGecode.cmake`: fix handling of static Gecode w/ MPFR
+
+The current logic does not work at all, `GECODE_LIBRARY`/`GECODE_TARGETS`
+are never referenced outside of this file,
+and MPFR never gets linked-in, resulting in linker failure.
+
+diff --git a/libminizinc/cmake/modules/FindGecode.cmake b/libminizinc/cmake/modules/FindGecode.cmake
+index 31325789b..ae29e112f 100644
+--- a/libminizinc/cmake/modules/FindGecode.cmake
++++ b/libminizinc/cmake/modules/FindGecode.cmake
+@@ -51,6 +51,14 @@ foreach(GECODE_COMP ${GECODE_COMPONENTS})
+   endif()
+ endforeach(GECODE_COMP)
+ 
++if(GECODE_HAS_MPFR)
++  find_package(MPFR)
++  set_target_properties(Gecode::Float PROPERTIES
++                        INTERFACE_LINK_LIBRARIES ${MPFR_LIBRARIES})
++  list(APPEND GECODE_LIBRARY ${MPFR_LIBRARIES})
++  list(APPEND GECODE_TARGETS ${MPFR_LIBRARIES})
++endif()
++
+ if(WIN32 AND GECODE_HAS_GIST AND GECODE_STATIC_LIBS)
+   find_package(Qt5 QUIET COMPONENTS Core Gui Widgets PrintSupport)
+   set_target_properties(Gecode::Gist PROPERTIES
+@@ -62,9 +70,6 @@ unset(GECODE_LIB_WIN)
+ unset(GECODE_LIB_LOC)
+ 
+ if(GECODE_LIBRARY AND GECODE_HAS_MPFR)
+-  find_package(MPFR)
+-  list(APPEND GECODE_LIBRARY ${MPFR_LIBRARIES})
+-  list(APPEND GECODE_TARGETS ${MPFR_LIBRARIES})
+ endif()
+ 
+ include(FindPackageHandleStandardArgs)
+-- 
+2.45.2
+

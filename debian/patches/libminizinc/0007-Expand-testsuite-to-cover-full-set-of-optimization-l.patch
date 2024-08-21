@@ -1,0 +1,45 @@
+From 82ab6472fe80c04047ff4e8d7909d11c90245858 Mon Sep 17 00:00:00 2001
+From: Roman Lebedev <lebedev.ri@gmail.com>
+Date: Fri, 23 Aug 2024 03:27:16 +0300
+Subject: [PATCH 7/8] Expand testsuite to cover full set of optimization levels
+
+
+diff --git a/libminizinc/tests/spec/suites.yml b/libminizinc/tests/spec/suites.yml
+index ff72d7feb..11b24c7bb 100644
+--- a/libminizinc/tests/spec/suites.yml
++++ b/libminizinc/tests/spec/suites.yml
+@@ -7,6 +7,12 @@ optimize-0: !Suite
+   options:
+     -O0: true
+ 
++optimize-1: !Suite
++  includes: ['examples/*']
++  strict: false
++  options:
++    -O1: true
++
+ optimize-2: !Suite
+   includes: ['examples/*']
+   strict: false
+@@ -19,6 +25,18 @@ optimize-3: !Suite
+   options:
+     -O3: true
+ 
++optimize-4: !Suite
++  includes: ['examples/*']
++  strict: false
++  options:
++    -O4: true
++
++optimize-5: !Suite
++  includes: ['examples/*']
++  strict: false
++  options:
++    -O5: true
++
+ no-mip-domains: !Suite
+   includes: ['examples/*']
+   strict: false
+-- 
+2.45.2
+
