@@ -13,3 +13,6 @@
 [submodule "pytest-html"]
 	path = pytest-html
 	url = ./
+[submodule "MiniZincIDE"]
+	path = MiniZincIDE
+	url = ./

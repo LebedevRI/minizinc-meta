@@ -1,7 +1,7 @@
 From 5fdea24aa3ebec67ab40e04d9f65dd0751dd41fe Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Fri, 23 Aug 2024 00:32:42 +0300
-Subject: [PATCH 5/8] `spec/unit/types/alias.mzn`: disable, fails with
+Subject: [PATCH 5/9] `spec/unit/types/alias.mzn`: disable, fails with
  assertions
 
 

@@ -24,6 +24,9 @@ Build-Depends: bison,
                python3-pytest-instafail,
                python3-pytest-xdist,
                python3-yaml,
+               qmake6,
+               qt6-base-dev,
+               qt6-websockets-dev,
                zlib1g-dev
 Standards-Version: 4.7.0
 Homepage: https://www.minizinc.org/
@@ -129,7 +132,7 @@ Homepage: https://github.com/Gecode/gecode
 Architecture: any
 Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends},
-         gecode-minizinc-data (= ${CHUFFED:VERSION})
+         gecode-minizinc-data (= ${GECODE:VERSION})
 Description: Generic Constraint Development Environment
  Gecode is an open source C++ toolkit for developing constraint-based systems
  and applications. Gecode provides a constraint solver with state-of-the-art
@@ -139,7 +142,7 @@ Package: libgecode-dev
 Homepage: https://github.com/Gecode/gecode
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
-         gecode-minizinc-data (= ${CHUFFED:VERSION}),
+         gecode-minizinc-data (= ${GECODE:VERSION}),
 Description: Generic Constraint Development Environment
  Gecode is an open source C++ toolkit for developing constraint-based systems
  and applications. Gecode provides a constraint solver with state-of-the-art
@@ -184,7 +187,7 @@ Homepage: https://github.com/MiniZinc/libminizinc
 Architecture: any
 Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends},
-         gecode-minizinc-data (= ${CHUFFED:VERSION})
+         gecode-minizinc-data (= ${GECODE:VERSION})
 Description: free and open-source constraint modelling language.
  You can use MiniZinc to model constraint satisfaction and optimization
  problems in a high-level, solver-independent way, taking advantage of a large
@@ -198,6 +201,16 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
 Recommends: minizinc-data (= ${MINIZINC:VERSION}),
             chuffed-minizinc-data (= ${CHUFFED:VERSION})
 Description: free and open-source constraint modelling language.
+ You can use MiniZinc to model constraint satisfaction and optimization
+ problems in a high-level, solver-independent way, taking advantage of a large
+ library of pre-defined constraints. Your model is then compiled into FlatZinc,
+ a solver input language that is understood by a wide range of solvers.
+
+Package: minizincide
+Homepage: https://github.com/MiniZinc/MiniZincIDE
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Integrated development environment for the high-level constraint modelling language MiniZinc
  You can use MiniZinc to model constraint satisfaction and optimization
  problems in a high-level, solver-independent way, taking advantage of a large
  library of pre-defined constraints. Your model is then compiled into FlatZinc,

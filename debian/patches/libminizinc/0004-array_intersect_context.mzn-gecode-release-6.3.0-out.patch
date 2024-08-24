@@ -1,7 +1,7 @@
 From 4b843d6fb9960cae24679298cc2d8e7bfa17349f Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Fri, 23 Aug 2024 00:14:12 +0300
-Subject: [PATCH 4/8] `array_intersect_context.mzn`: gecode `release/6.3.0`
+Subject: [PATCH 4/9] `array_intersect_context.mzn`: gecode `release/6.3.0`
  output is different
 
 

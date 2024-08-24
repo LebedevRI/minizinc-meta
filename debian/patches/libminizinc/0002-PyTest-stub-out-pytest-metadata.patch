@@ -1,7 +1,7 @@
 From 975da086e69904d84e923fc5c876640ba1a9794a Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Thu, 22 Aug 2024 21:56:09 +0300
-Subject: [PATCH 2/8] PyTest: stub out pytest-metadata
+Subject: [PATCH 2/9] PyTest: stub out pytest-metadata
 
 Not in `requirements.txt` and not packaged in debian
 

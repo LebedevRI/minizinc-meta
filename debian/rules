@@ -14,6 +14,7 @@ endif
 PYTHON3_VERSION = $(shell py3versions --default)
 
 export PYBUILD_NAME=minizinc
+export QT_SELECT=qt6
 
 export CHUFFED_VERSION = 0.13.2
 export GECODE_VERSION = 6.2.0~git20240315.f7f0d7c27
@@ -33,7 +34,7 @@ export PYTHON3_PYTEST_HTML_DEB_VERSION = $(PYTHON3_PYTEST_HTML_VERSION)+$(DEB_RE
 
 CHUFFED_BINARY_PACKAGES = chuffed-flatzinc chuffed-minizinc-data minizinc-solver-chuffed libchuffed-dev
 GECODE_BINARY_PACKAGES = gecode-flatzinc gecode-minizinc-data minizinc-solver-gecode libgecode-dev
-MINIZINC_BINARY_PACKAGES = minizinc minizinc-data minizinc-solver-chuffed-internal minizinc-solver-gecode-internal libmzn-dev
+MINIZINC_BINARY_PACKAGES = minizinc minizinc-data minizinc-solver-chuffed-internal minizinc-solver-gecode-internal libmzn-dev minizincide
 MINIZINC_PYTHON_BINARY_PACKAGES = python3-minizinc
 PYTHON3_PYTEST_HTML_BINARY_PACKAGES = python3-pytest-html
 
@@ -53,8 +54,8 @@ WITH_PGO = OFF
 WITH_LLD = ON
 
 ifeq ($(DEB_HOST_ARCH),amd64)
-# 	WITH_LTO = ON
-# 	WITH_PGO = ON
+	WITH_LTO = ON
+	WITH_PGO = ON
 endif
 
 ifneq (,$(filter nolto,$(DEB_BUILD_OPTIONS)))
@@ -87,10 +88,10 @@ _CFLAGS += -g -gz -gsplit-dwarf
 _LDFLAGS += -Wl,--gdb-index
 
 # _CFLAGS += -O1
-_CFLAGS += -O2
-# _CFLAGS += -O3
-_CFLAGS += -UNDEBUG
-# _CFLAGS += -DNDEBUG
+# _CFLAGS += -O2
+_CFLAGS += -O3
+# _CFLAGS += -UNDEBUG
+_CFLAGS += -DNDEBUG
 _CFLAGS += $(STAGE_COMPILE_FLAGS)
 
 ifneq ($(WITH_LLD),OFF)
@@ -212,7 +213,10 @@ perform_stage_build_minizinc:
 
 	dh_auto_install --builddir=$(BUILD_DIR)/libminizinc --destdir=$(INSTALL_DIR)/staging
 
+	sed -i 's/"name": "Chuffed"/"name": "Chuffed (internal)"/' $(INSTALL_DIR)/staging/usr/share/minizinc/solvers/chuffed_internal.msc
+
 	cat $(INSTALL_DIR)/usr/share/minizinc/solvers/gecode.msc | \
+		sed 's/"name": "Gecode"/"name": "Gecode (internal)"/' | \
 		sed 's/"org.gecode.gecode"/"org.minizinc.gecode_presolver"/' | \
 		sed 's/"executable"/"_executable"/' | \
 		sed 's/"-Ggecode"/"-Ggecode_presolver"/' > \
@@ -221,8 +225,8 @@ perform_stage_build_minizinc:
 	# Remove the whole build directory. We no longer need it.
 	rm -rf $(BUILD_DIR)
 
-test_minizinc_internal_late:
 ifneq ($(WITH_TESTS),OFF)
+test_minizinc_internal_late:
 	# Many test failures when using gecode_presolver,
 	# so still use external gecode.
 	for b in fzn-chuffed mzn-gecode; do \
@@ -234,7 +238,7 @@ ifneq ($(WITH_TESTS),OFF)
 # 	cp $(INSTALL_DIR)/usr/share/minizinc/solvers-orig/gecode_internal.msc $(INSTALL_DIR)/usr/share/minizinc/solvers/
 	cp $(INSTALL_DIR)/usr/share/minizinc/solvers-orig/gecode.msc $(INSTALL_DIR)/usr/share/minizinc/solvers/
 # 	sed -i 's/"tags": \[/"tags": \["gecode", /' $(INSTALL_DIR)/usr/share/minizinc/solvers/gecode_internal.msc
-	cd $(SOURCE_DIR)/libminizinc/tests/; HOME=$(BUILD_DIR)/tmphome PATH="$(PATH):$(INSTALL_DIR)/usr/bin" PYTHONPATH="$(PYTHONPATH):$(INSTALL_DIR)/usr/lib/$(PYTHON3_VERSION)/dist-packages/" pytest --all-suites --solvers chuffed,gecode -n 1
+	cd $(SOURCE_DIR)/libminizinc/tests/; HOME=$(BUILD_DIR)/tmphome PATH="$(PATH):$(INSTALL_DIR)/usr/bin" PYTHONPATH="$(PYTHONPATH):$(INSTALL_DIR)/usr/lib/$(PYTHON3_VERSION)/dist-packages/" pytest --all-suites --solvers chuffed,gecode -n $(NUMJOBS)
 	rm -rf $(INSTALL_DIR)/usr/share/minizinc/solvers/
 	mv $(INSTALL_DIR)/usr/share/minizinc/solvers-orig $(INSTALL_DIR)/usr/share/minizinc/solvers
 	for b in fzn-chuffed mzn-gecode; do \
@@ -243,17 +247,26 @@ ifneq ($(WITH_TESTS),OFF)
 endif
 
 # NOTE: this runs after perform_stage_build_minizinc_python!
-test_minizinc_normal_late:
 ifneq ($(WITH_TESTS),OFF)
-	cd $(SOURCE_DIR)/libminizinc/tests/; PATH="$(PATH):$(INSTALL_DIR)/usr/bin" PYTHONPATH="$(PYTHONPATH):$(INSTALL_DIR)/usr/lib/$(PYTHON3_VERSION)/dist-packages/" pytest --all-suites --solvers chuffed,gecode -n 1
+test_minizinc_normal_late:
+	cd $(SOURCE_DIR)/libminizinc/tests/; PATH="$(PATH):$(INSTALL_DIR)/usr/bin" PYTHONPATH="$(PYTHONPATH):$(INSTALL_DIR)/usr/lib/$(PYTHON3_VERSION)/dist-packages/" pytest --all-suites --solvers chuffed,gecode -n $(NUMJOBS)
 endif
 
 # NOTE: this runs after perform_stage_build_minizinc_python!
-test_minizinc_late:
 ifneq ($(WITH_TESTS),OFF)
+test_minizinc_late:
 	$(MAKE) -f debian/rules test_minizinc_internal_late
 	$(MAKE) -f debian/rules test_minizinc_normal_late
 endif
+
+build_minizincide:
+	mkdir -p $(BUILDSPACE)/bin/
+	ln -fs /usr/bin/clang++-$(LLVM_VERSION) $(BUILDSPACE)/bin/clang++
+	ln -fs /usr/bin/clang-$(LLVM_VERSION) $(BUILDSPACE)/bin/clang
+	ln -fs /usr/bin/ld.lld-$(LLVM_VERSION) $(BUILDSPACE)/bin/ld
+	PATH="$(PATH):$(BUILDSPACE)/bin" dh_auto_configure --buildsystem=qmake6 --builddir=$(BUILD_DIR)/MiniZincIDE -- -spec linux-clang $(SOURCE_DIR)/MiniZincIDE/MiniZincIDE
+	PATH="$(PATH):$(BUILDSPACE)/bin" dh_auto_build     --buildsystem=qmake6 --builddir=$(BUILD_DIR)/MiniZincIDE
+	dh_auto_install --buildsystem=qmake6 --builddir=$(BUILD_DIR)/MiniZincIDE --destdir=$(INSTALL_DIR)
 
 perform_stage_build_minizinc_python:
 	dh_auto_configure --buildsystem=pybuild --sourcedir=$(SOURCE_DIR)/minizinc-python
@@ -286,7 +299,9 @@ perform_stage_build_impl:
 # 	$(merge-separate-install-prefix)
 	$(MAKE) -f debian/rules perform_stage_build_minizinc_python
 	$(merge-separate-install-prefix)
+ifneq ($(WITH_TESTS),OFF)
 	$(MAKE) -f debian/rules test_minizinc_late
+endif
 
 perform_stage_build:
 	LLVM_PROFILE_FILE="$(PROFILE_TMP_DIR)/stage-$(BUILD_STAGE)-%$(NUM_PROFILE_FILES)m.profraw" $(MAKE) -f debian/rules perform_stage_build_impl
@@ -312,6 +327,7 @@ ifneq ($(WITH_PGO),OFF)
 else
 	$(MAKE) -f debian/rules perform_stage_build
 endif
+	$(MAKE) -f debian/rules build_minizincide
 
 override_dh_auto_build:
 ifeq ("$(ENTRY_MAKE_TARGET)","binary-indep")

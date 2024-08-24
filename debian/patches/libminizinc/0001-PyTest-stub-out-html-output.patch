@@ -1,7 +1,7 @@
 From b4059316f66c709ae09892b5cdb809ba187f0911 Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Thu, 22 Aug 2024 09:02:35 +0300
-Subject: [PATCH 1/8] PyTest: stub out html output
+Subject: [PATCH 1/9] PyTest: stub out html output
 
 Debian does not package python3-pytest-html,
 and i'm not yet sure how to do that.

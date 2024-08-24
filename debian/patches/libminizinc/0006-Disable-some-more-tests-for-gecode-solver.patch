@@ -1,7 +1,7 @@
 From f1e1ea6513c6d7a4a21a970c33659ffd63149b5f Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Fri, 23 Aug 2024 02:42:18 +0300
-Subject: [PATCH 6/8] Disable some more tests for gecode solver
+Subject: [PATCH 6/9] Disable some more tests for gecode solver
 
 These fail with
 ```
