@@ -1,4 +1,3 @@
-0001-FindGecode.cmake-fix-handling-of-static-Gecode-w-MPF.patch
 0001-Fix-chuffed-config.cmake.in.patch
 gecode/0001-Drop-.orig-file-that-gets-auto-deleted.patch
 gecode/0002-CMake-improve-handling-of-gecode-test.patch

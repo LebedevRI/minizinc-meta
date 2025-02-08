@@ -26,11 +26,11 @@ Adding `libminizinc` submodule/subproject:
 ```
 git remote add libminizinc https://github.com/MiniZinc/libminizinc.git
 git fetch --all --prune
-git tag libminizinc/2.8.5 2fdef7b40921981f3f9ea82017e9d84937ddab77
+git tag libminizinc/2.8.7 718bf0be44373fbbf1341d9655e4730db0d609f0
 git -c protocol.file.allow=always submodule add --name libminizinc --reference ./ -- ./ libminizinc
 git submodule sync
 git submodule foreach 'cd .. && git submodule set-url $sm_path `pwd`'
-cd libminizinc && git fetch --all -p && git checkout -f libminizinc/2.8.5 && cd ..
+cd libminizinc && git fetch --all -p && git checkout -f libminizinc/2.8.7 && cd ..
 ```
 
 Adding `minizinc-python` submodule/subproject:
@@ -82,15 +82,15 @@ Adding `MiniZincIDE` submodule/subproject:
 ```
 git remote add MiniZincIDE https://github.com/MiniZinc/MiniZincIDE.git
 git fetch --all --prune
-git tag MiniZincIDE/2.8.5 b1da70d7644a834e3a7f5960b7848c0b611368a1
+git tag MiniZincIDE/2.8.7 4e2207f527eb1c7cfbdb23b4c161b7c6d70b2abe
 git -c protocol.file.allow=always submodule add --name MiniZincIDE --reference ./ -- ./ MiniZincIDE
 git submodule sync
 git submodule foreach 'cd .. && git submodule set-url $sm_path `pwd`'
-cd MiniZincIDE && git fetch --all -p && git checkout -f MiniZincIDE/2.8.5 && cd ..
+cd MiniZincIDE && git fetch --all -p && git checkout -f MiniZincIDE/2.8.7 && cd ..
 ```
 
 `git format-patch -p gecode/6.2.0+20240315150732+git204+gf7f0d7c27..gecode/pq --src-prefix=a/gecode/ --dst-prefix=b/gecode/ --output-directory=../debian/patches/gecode/`
-`git format-patch -p libminizinc/2.8.5..libminizinc/pq --src-prefix=a/libminizinc/ --dst-prefix=b/libminizinc/ --output-directory=../debian/patches/libminizinc/`
+`git format-patch -p libminizinc/2.8.7..libminizinc/pq --src-prefix=a/libminizinc/ --dst-prefix=b/libminizinc/ --output-directory=../debian/patches/libminizinc/`
 `git format-patch -p minizinc-python/0.9.0..minizinc-python/pq --src-prefix=a/minizinc-python/ --dst-prefix=b/minizinc-python/ --output-directory=../debian/patches/minizinc-python/`
 `git format-patch -p pytest-html/4.1.1..pytest-html/pq --src-prefix=a/pytest-html/ --dst-prefix=b/pytest-html/ --output-directory=../debian/patches/pytest-html/`
 `git diff -p -U99999 0.13.2 --src-prefix=a/chuffed/ --dst-prefix=b/chuffed/ > ../debian/patches/0001-chuffed-fix-cmake.patch`

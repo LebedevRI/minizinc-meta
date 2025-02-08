@@ -1,3 +1,9 @@
+minizinc-meta (1.0.1-mzn1) unstable; urgency=medium
+
+  * Minizinc 2.8.7, build with LLVM19
+
+ -- Roman Lebedev <lebedev.ri@gmail.com>  Sat, 08 Feb 2025 21:14:07 +0300
+
 minizinc-meta (1.0.0-mzn1) unstable; urgency=medium
 
   * Initial minizinc meta package

@@ -1,4 +1,4 @@
-From f91c296731ccfefe767f51de7079cc05b1d91957 Mon Sep 17 00:00:00 2001
+From 27d6fa486a241300c807b4f7ceb14e7ce0463c30 Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Sat, 24 Aug 2024 23:29:46 +0300
 Subject: [PATCH 8/9] `bug85.mzn`: fails with internal chuffed
@@ -16,5 +16,5 @@ index a71c0174f..35a15526e 100644
  - !Result
    solution: !Solution
 -- 
-2.45.2
+2.47.2
 
