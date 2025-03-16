@@ -18,8 +18,8 @@ export QT_SELECT=qt6
 
 export CHUFFED_VERSION = 0.13.2
 export GECODE_VERSION = 6.2.0~git20240315.f7f0d7c27
-export MINIZINC_VERSION = 2.8.7
-export MINIZINC_PYTHON_VERSION = 0.9.0
+export MINIZINC_VERSION = 2.9.2
+export MINIZINC_PYTHON_VERSION = 0.10.0
 export PYTHON3_PYTEST_HTML_VERSION = 4.1.1
 # this needs to also support updates and ubuntu versions, e.g.:
 # - x.y.z+11+deb10u1

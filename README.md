@@ -5,10 +5,10 @@
 Versions:
 * `chuffed`: `0.13.2` (`2016f7eb7943a86b9ce93bb70b821d701667a5ca`)
 * `gecode`: `release/6.3.0` branch commit (`f7f0d7c273d6844698f01cec8229ebe0b66a016a`, aka `release-6.2.0-204-gf7f0d7c27`)
-* `libminizinc`: `2.8.5` (`2fdef7b40921981f3f9ea82017e9d84937ddab77`)
-* `minizinc-python`: `0.9.0` (`3fc2ffc7c7f85326f3cca1da2a07151a8f4c0a68`)
+* `libminizinc`: `2.9.2` (`83e59432fef41a67b653898b24db37488b63df06`)
+* `minizinc-python`: `0.10.0` (`2db41dd125ca98fee712ddb3d6436c2eca98d2fc`)
 * `pytest-html`: `4.1.1` (`cfd32d08488e2c6fb72f0617db94ab41d3fca8d0`)
-* `MiniZincIDE`: `2.8.5` (`b1da70d7644a834e3a7f5960b7848c0b611368a1`)
+* `MiniZincIDE`: `2.9.2` (`5dcfd43612519fd30c8b44eb0163667f83e30958`)
 
 Usage workflow:
 ```
@@ -26,22 +26,22 @@ Adding `libminizinc` submodule/subproject:
 ```
 git remote add libminizinc https://github.com/MiniZinc/libminizinc.git
 git fetch --all --prune
-git tag libminizinc/2.8.7 718bf0be44373fbbf1341d9655e4730db0d609f0
+git tag libminizinc/2.9.2 83e59432fef41a67b653898b24db37488b63df06
 git -c protocol.file.allow=always submodule add --name libminizinc --reference ./ -- ./ libminizinc
 git submodule sync
 git submodule foreach 'cd .. && git submodule set-url $sm_path `pwd`'
-cd libminizinc && git fetch --all -p && git checkout -f libminizinc/2.8.7 && cd ..
+cd libminizinc && git fetch --all -p && git checkout -f libminizinc/2.9.2 && cd ..
 ```
 
 Adding `minizinc-python` submodule/subproject:
 ```
 git remote add minizinc-python https://github.com/MiniZinc/minizinc-python.git
 git fetch --all --prune
-git tag minizinc-python/0.9.0 3fc2ffc7c7f85326f3cca1da2a07151a8f4c0a68
+git tag minizinc-python/0.10.0 2db41dd125ca98fee712ddb3d6436c2eca98d2fc
 git -c protocol.file.allow=always submodule add --name minizinc-python --reference ./ -- ./ minizinc-python
 git submodule sync
 git submodule foreach 'cd .. && git submodule set-url $sm_path `pwd`'
-cd minizinc-python && git fetch --all -p && git checkout -f minizinc-python/0.9.0 && cd ..
+cd minizinc-python && git fetch --all -p && git checkout -f minizinc-python/0.10.0 && cd ..
 ```
 
 Adding `pytest-html` submodule/subproject:
@@ -82,15 +82,15 @@ Adding `MiniZincIDE` submodule/subproject:
 ```
 git remote add MiniZincIDE https://github.com/MiniZinc/MiniZincIDE.git
 git fetch --all --prune
-git tag MiniZincIDE/2.8.7 4e2207f527eb1c7cfbdb23b4c161b7c6d70b2abe
+git tag MiniZincIDE/2.9.2 5dcfd43612519fd30c8b44eb0163667f83e30958
 git -c protocol.file.allow=always submodule add --name MiniZincIDE --reference ./ -- ./ MiniZincIDE
 git submodule sync
 git submodule foreach 'cd .. && git submodule set-url $sm_path `pwd`'
-cd MiniZincIDE && git fetch --all -p && git checkout -f MiniZincIDE/2.8.7 && cd ..
+cd MiniZincIDE && git fetch --all -p && git checkout -f MiniZincIDE/2.9.2 && cd ..
 ```
 
 `git format-patch -p gecode/6.2.0+20240315150732+git204+gf7f0d7c27..gecode/pq --src-prefix=a/gecode/ --dst-prefix=b/gecode/ --output-directory=../debian/patches/gecode/`
-`git format-patch -p libminizinc/2.8.7..libminizinc/pq --src-prefix=a/libminizinc/ --dst-prefix=b/libminizinc/ --output-directory=../debian/patches/libminizinc/`
-`git format-patch -p minizinc-python/0.9.0..minizinc-python/pq --src-prefix=a/minizinc-python/ --dst-prefix=b/minizinc-python/ --output-directory=../debian/patches/minizinc-python/`
+`git format-patch -p libminizinc/2.9.2..libminizinc/pq --src-prefix=a/libminizinc/ --dst-prefix=b/libminizinc/ --output-directory=../debian/patches/libminizinc/`
+`git format-patch -p minizinc-python/0.10.0..minizinc-python/pq --src-prefix=a/minizinc-python/ --dst-prefix=b/minizinc-python/ --output-directory=../debian/patches/minizinc-python/`
 `git format-patch -p pytest-html/4.1.1..pytest-html/pq --src-prefix=a/pytest-html/ --dst-prefix=b/pytest-html/ --output-directory=../debian/patches/pytest-html/`
 `git diff -p -U99999 0.13.2 --src-prefix=a/chuffed/ --dst-prefix=b/chuffed/ > ../debian/patches/0001-chuffed-fix-cmake.patch`
