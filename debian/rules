@@ -84,7 +84,7 @@ BUILD_STAGE ?= 2
 STAGE_COMPILE_FLAGS ?=
 
 # We do want some debug info, but use compressed split dwarf.
-_CFLAGS += -g -gz -gsplit-dwarf
+_CFLAGS += -g1 -gline-tables-only -gz -gsplit-dwarf
 _LDFLAGS += -Wl,--gdb-index
 
 # _CFLAGS += -O1
@@ -92,6 +92,8 @@ _LDFLAGS += -Wl,--gdb-index
 _CFLAGS += -O3
 # _CFLAGS += -UNDEBUG
 _CFLAGS += -DNDEBUG
+_CFLAGS += -march=native
+_CFLAGS += -fvisibility=hidden -fvisibility-inlines-hidden
 _CFLAGS += $(STAGE_COMPILE_FLAGS)
 
 ifneq ($(WITH_LLD),OFF)

@@ -1,9 +1,14 @@
+minizinc-meta (1.0.2-mzn2) unstable; urgency=medium
+
+  * `-march=native` and stuff
+
+ -- Roman Lebedev <lebedev.ri@gmail.com>  Wed, 19 Mar 2025 21:22:09 +0300
+
 minizinc-meta (1.0.2-mzn1) UNRELEASED; urgency=medium
 
   * Minizinc 2.9.2
 
  -- Roman Lebedev <lebedev.ri@gmail.com>  Sun, 16 Mar 2025 23:01:01 +0300
-
 minizinc-meta (1.0.1-mzn1) unstable; urgency=medium
 
   * Minizinc 2.8.7, build with LLVM19
