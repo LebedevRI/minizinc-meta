@@ -1,0 +1,40 @@
+From aa9b0d7f73b5ff53c74de0589da2a9c5032a0c37 Mon Sep 17 00:00:00 2001
+From: Roman Lebedev <lebedev.ri@gmail.com>
+Date: Wed, 19 Mar 2025 23:30:42 +0300
+Subject: [PATCH 2/2] Statically link mimalloc into chuffed
+
+
+diff --git a/chuffed/CMakeLists.txt b/chuffed/CMakeLists.txt
+index 0b032569c..ddeeaba12 100644
+--- a/chuffed/CMakeLists.txt
++++ b/chuffed/CMakeLists.txt
+@@ -45,6 +45,8 @@ if(WIN32)
+   add_definitions(-DYY_NO_UNISTD_H)
+ endif()
+ 
++find_package(mimalloc)
++
+ # ------------- CP Profiler Integration -------------
+ 
+ add_library(thirdparty_cp_profiler OBJECT
+@@ -197,6 +199,8 @@ if(CP_PROFILER)
+   target_compile_definitions(chuffed PRIVATE HAS_PROFILER)
+ endif()
+ 
++target_link_libraries(chuffed mimalloc-static)
++
+ # ------------- FZN Chuffed -------------
+ 
+ find_package(BISON 3.4)
+@@ -255,6 +259,8 @@ add_library(chuffed_fzn
+   $<TARGET_OBJECTS:flatzinc_parser>
+ )
+ 
++target_link_libraries(chuffed_fzn mimalloc-static)
++
+ add_executable(fzn-chuffed chuffed/flatzinc/fzn-chuffed.cpp)
+ target_link_libraries(fzn-chuffed chuffed_fzn chuffed ${CMAKE_THREAD_LIBS_INIT})
+ 
+-- 
+2.49.0
+

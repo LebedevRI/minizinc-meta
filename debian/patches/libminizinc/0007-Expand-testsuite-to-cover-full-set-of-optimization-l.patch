@@ -1,7 +1,8 @@
-From 7480102d2a61963bbe85eda0f67bca1cab4d8b89 Mon Sep 17 00:00:00 2001
+From a8f0971010d89934504bce72b921a4db169186c0 Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Fri, 23 Aug 2024 03:27:16 +0300
-Subject: [PATCH 7/9] Expand testsuite to cover full set of optimization levels
+Subject: [PATCH 07/10] Expand testsuite to cover full set of optimization
+ levels
 
 
 diff --git a/libminizinc/tests/spec/suites.yml b/libminizinc/tests/spec/suites.yml
@@ -41,5 +42,5 @@ index ff72d7feb..11b24c7bb 100644
    includes: ['examples/*']
    strict: false
 -- 
-2.47.2
+2.49.0
 

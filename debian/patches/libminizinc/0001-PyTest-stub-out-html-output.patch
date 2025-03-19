@@ -1,7 +1,7 @@
-From 1753135c67367fed06d2d7fb6a4db4f8cd9beed8 Mon Sep 17 00:00:00 2001
+From 317fee06d309f879dd95bfb4f806eb64dd66964f Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Thu, 22 Aug 2024 09:02:35 +0300
-Subject: [PATCH 1/9] PyTest: stub out html output
+Subject: [PATCH 01/10] PyTest: stub out html output
 
 Debian does not package python3-pytest-html,
 and i'm not yet sure how to do that.
@@ -124,5 +124,5 @@ index 3db599d9a..b00a2a749 100644
  junit_suite_name = minizinc
  junit_logging = system-err
 -- 
-2.47.2
+2.49.0
 

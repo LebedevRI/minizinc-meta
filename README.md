@@ -3,6 +3,7 @@
 > submodules are actually stored in this very same git repo!
 
 Versions:
+* `mimalloc`: `v3.0.1` (`e14cfd2578fd68205b8d38895abe120bb622580e`)
 * `chuffed`: `0.13.2` (`2016f7eb7943a86b9ce93bb70b821d701667a5ca`)
 * `gecode`: `release/6.3.0` branch commit (`f7f0d7c273d6844698f01cec8229ebe0b66a016a`, aka `release-6.2.0-204-gf7f0d7c27`)
 * `libminizinc`: `2.9.2` (`83e59432fef41a67b653898b24db37488b63df06`)
@@ -20,6 +21,17 @@ git submodule sync
 git submodule foreach 'cd .. && git submodule set-url $sm_path `pwd`'
 git -c protocol.file.allow=always submodule update --reference ./
 git submodule foreach 'git config --local protocol.file.allow always'
+```
+
+Adding `mimalloc` submodule/subproject:
+```
+git remote add mimalloc https://github.com/microsoft/mimalloc.git
+git fetch --all --prune
+git tag mimalloc/3.0.1 e14cfd2578fd68205b8d38895abe120bb622580e
+git -c protocol.file.allow=always submodule add --name mimalloc --reference ./ -- ./ mimalloc
+git submodule sync
+git submodule foreach 'cd .. && git submodule set-url $sm_path `pwd`'
+cd mimalloc && git fetch --all -p && git checkout -f mimalloc/3.0.1 && cd ..
 ```
 
 Adding `libminizinc` submodule/subproject:
@@ -89,8 +101,8 @@ git submodule foreach 'cd .. && git submodule set-url $sm_path `pwd`'
 cd MiniZincIDE && git fetch --all -p && git checkout -f MiniZincIDE/2.9.2 && cd ..
 ```
 
+`git format-patch -p chuffed/0.13.2..chuffed/pq --src-prefix=a/chuffed/ --dst-prefix=b/chuffed/ --output-directory=../debian/patches/chuffed/`
 `git format-patch -p gecode/6.2.0+20240315150732+git204+gf7f0d7c27..gecode/pq --src-prefix=a/gecode/ --dst-prefix=b/gecode/ --output-directory=../debian/patches/gecode/`
 `git format-patch -p libminizinc/2.9.2..libminizinc/pq --src-prefix=a/libminizinc/ --dst-prefix=b/libminizinc/ --output-directory=../debian/patches/libminizinc/`
 `git format-patch -p minizinc-python/0.10.0..minizinc-python/pq --src-prefix=a/minizinc-python/ --dst-prefix=b/minizinc-python/ --output-directory=../debian/patches/minizinc-python/`
 `git format-patch -p pytest-html/4.1.1..pytest-html/pq --src-prefix=a/pytest-html/ --dst-prefix=b/pytest-html/ --output-directory=../debian/patches/pytest-html/`
-`git diff -p -U99999 0.13.2 --src-prefix=a/chuffed/ --dst-prefix=b/chuffed/ > ../debian/patches/0001-chuffed-fix-cmake.patch`

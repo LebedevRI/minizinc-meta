@@ -16,3 +16,6 @@
 [submodule "MiniZincIDE"]
 	path = MiniZincIDE
 	url = ./
+[submodule "mimalloc"]
+	path = mimalloc
+	url = ./

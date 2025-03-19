@@ -1,7 +1,7 @@
-From 492c11c2d752e0bbc135b213f515777873253471 Mon Sep 17 00:00:00 2001
+From 0665690364bc98ca1801b91eaca258bdda193d30 Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Fri, 23 Aug 2024 02:42:18 +0300
-Subject: [PATCH 6/9] Disable some more tests for gecode solver
+Subject: [PATCH 06/10] Disable some more tests for gecode solver
 
 These fail with
 ```
@@ -50,5 +50,5 @@ index 7ab5e145a..5ca21f82b 100644
  - !Result
    solution: !Solution
 -- 
-2.47.2
+2.49.0
 

@@ -1,0 +1,34 @@
+From 9c55b92956c4eda16ed4aafb1178140d06152262 Mon Sep 17 00:00:00 2001
+From: Roman Lebedev <lebedev.ri@gmail.com>
+Date: Wed, 19 Mar 2025 23:54:06 +0300
+Subject: [PATCH 10/10] Link libmzn to mimalloc
+
+
+diff --git a/libminizinc/CMakeLists.txt b/libminizinc/CMakeLists.txt
+index 1002c126a..98ab512b9 100644
+--- a/libminizinc/CMakeLists.txt
++++ b/libminizinc/CMakeLists.txt
+@@ -36,6 +36,7 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/vendor/chuffed/lib/cma
+ if(POLICY CMP0074)
+   cmake_policy(SET CMP0074 NEW)
+ endif(POLICY CMP0074)
++find_package(mimalloc)
+ find_package(Geas)
+ find_package(Gecode 6.2 COMPONENTS Driver Float Int Kernel Minimodel Search Set Support)
+ find_package(atlantis)
+diff --git a/libminizinc/cmake/targets/libmzn.cmake b/libminizinc/cmake/targets/libmzn.cmake
+index abf9d934c..ffe757dfa 100644
+--- a/libminizinc/cmake/targets/libmzn.cmake
++++ b/libminizinc/cmake/targets/libmzn.cmake
+@@ -127,7 +127,7 @@ add_library(mzn
+   $<TARGET_OBJECTS:minizinc_mip>
+   $<TARGET_OBJECTS:minizinc_nl>
+ )
+-target_link_libraries(mzn ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
++target_link_libraries(mzn mimalloc-static ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
+ 
+ ### Add Solver Interfaces to the MiniZinc library when available
+ include(cmake/targets/libminizinc_atlantis.cmake)
+-- 
+2.49.0
+

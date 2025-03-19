@@ -1,7 +1,7 @@
-From 266add3a8f9421769ef0a65eddcc3eea9b60d70b Mon Sep 17 00:00:00 2001
+From e1aaafe37ac8167b26e9cbce457aa4b889ee5eaa Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Sun, 25 Aug 2024 02:54:26 +0300
-Subject: [PATCH 9/9] `battleships_2.mzn`: fails with gecode @ -O4 / -O5
+Subject: [PATCH 09/10] `battleships_2.mzn`: fails with gecode @ -O4 / -O5
 
 
 diff --git a/libminizinc/tests/spec/examples/battleships_2.mzn b/libminizinc/tests/spec/examples/battleships_2.mzn
@@ -16,5 +16,5 @@ index 09cb05834..6b86e29ae 100644
  - !Result
    solution: !Solution
 -- 
-2.47.2
+2.49.0
 

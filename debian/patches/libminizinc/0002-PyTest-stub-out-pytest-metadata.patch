@@ -1,7 +1,7 @@
-From 985e7ff59114ae6e0cef20f132d0469828031b4e Mon Sep 17 00:00:00 2001
+From d460846c61a5e6111341b514ec2181612150a15a Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Thu, 22 Aug 2024 21:56:09 +0300
-Subject: [PATCH 2/9] PyTest: stub out pytest-metadata
+Subject: [PATCH 02/10] PyTest: stub out pytest-metadata
 
 Not in `requirements.txt` and not packaged in debian
 
@@ -29,5 +29,5 @@ index 5a5a2d714..aa0b43156 100644
  
  class MznFile(pytest.File):
 -- 
-2.47.2
+2.49.0
 

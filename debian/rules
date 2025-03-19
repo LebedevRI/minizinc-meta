@@ -129,6 +129,35 @@ endef
 %:
 	ENTRY_MAKE_TARGET="$(@)" SOURCE_DIR="$(CURDIR)" dh $@ --with python3 --buildsystem=cmake+ninja
 
+perform_stage_build_mimalloc:
+	dh_auto_configure --sourcedir=$(SOURCE_DIR)/mimalloc --builddir=$(BUILD_DIR)/mimalloc -- \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_C_FLAGS="$(CFLAGS)" \
+	-DCMAKE_C_FLAGS_RELEASE="$(CFLAGS)" \
+	-DCMAKE_CXX_FLAGS="$(CXXFLAGS)" \
+	-DCMAKE_CXX_FLAGS_RELEASE="$(CXXFLAGS)" \
+	-DBUILD_SHARED_LIBS=OFF \
+	-DCMAKE_POLICY_DEFAULT_CMP0069=NEW \
+	-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=$(WITH_LTO) \
+	-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+	-DCMAKE_C_VISIBILITY_PRESET=hidden \
+	-DCMAKE_CXX_VISIBILITY_PRESET=hidden \
+	-DCMAKE_VISIBILITY_INLINES_HIDDEN=ON \
+	-DMI_OVERRIDE=ON \
+	-DMI_OPT_ARCH=OFF \
+	-DMI_OPT_SIMD=OFF \
+	-DMI_BUILD_SHARED=OFF \
+	-DMI_BUILD_OBJECT=OFF \
+	-DMI_BUILD_STATIC=ON \
+	-DMI_BUILD_TESTS=OFF
+
+	dh_auto_build --builddir=$(BUILD_DIR)/mimalloc
+
+	dh_auto_install --builddir=$(BUILD_DIR)/mimalloc --destdir=$(INSTALL_DIR)/staging
+
+	# Remove the whole build directory. We no longer need it.
+	rm -rf $(BUILD_DIR)
+
 perform_stage_build_chuffed:
 	dh_auto_configure --sourcedir=$(SOURCE_DIR)/chuffed --builddir=$(BUILD_DIR)/chuffed -- \
 	-DCMAKE_BUILD_TYPE=Release \
@@ -142,7 +171,8 @@ perform_stage_build_chuffed:
 	-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
 	-DCMAKE_C_VISIBILITY_PRESET=hidden \
 	-DCMAKE_CXX_VISIBILITY_PRESET=hidden \
-	-DCMAKE_VISIBILITY_INLINES_HIDDEN=ON
+	-DCMAKE_VISIBILITY_INLINES_HIDDEN=ON \
+	-Dmimalloc_DIR=$(INSTALL_DIR)/usr/lib/$(DEB_HOST_MULTIARCH)/cmake/mimalloc-3.0/
 
 	dh_auto_build --builddir=$(BUILD_DIR)/chuffed
 
@@ -204,7 +234,8 @@ perform_stage_build_minizinc:
 	-DCMAKE_CXX_VISIBILITY_PRESET=hidden \
 	-DCMAKE_VISIBILITY_INLINES_HIDDEN=ON \
 	-Dchuffed_DIR=$(INSTALL_DIR)/usr/lib/$(DEB_HOST_MULTIARCH)/cmake/chuffed/ \
-	-DGecode_ROOT=$(INSTALL_DIR)/usr/
+	-DGecode_ROOT=$(INSTALL_DIR)/usr/ \
+	-Dmimalloc_DIR=$(INSTALL_DIR)/usr/lib/$(DEB_HOST_MULTIARCH)/cmake/mimalloc-3.0/
 
 	dh_auto_build --builddir=$(BUILD_DIR)/libminizinc
 
@@ -291,6 +322,8 @@ endif
 # 	rm -rf $(BUILD_DIR)
 
 perform_stage_build_impl:
+	$(MAKE) -f debian/rules perform_stage_build_mimalloc
+	$(merge-separate-install-prefix)
 	$(MAKE) -f debian/rules perform_stage_build_chuffed
 	$(merge-separate-install-prefix)
 	$(MAKE) -f debian/rules perform_stage_build_gecode
@@ -352,6 +385,10 @@ override_dh_install:
 	dh_install --sourcedir=$(INSTALL_DIR)
 
 override_dh_missing:
+	rm -rf $(INSTALL_DIR)/usr/include/mimalloc-3.0
+	rm -rf $(INSTALL_DIR)/usr/lib/*/cmake/mimalloc-3.0
+	rm -rf $(INSTALL_DIR)/usr/lib/*/mimalloc-3.0
+	rm -rf $(INSTALL_DIR)/usr/lib/*/pkgconfig/mimalloc.pc
 	dh_missing --sourcedir=$(INSTALL_DIR) --fail-missing
 
 override_dh_dwz:

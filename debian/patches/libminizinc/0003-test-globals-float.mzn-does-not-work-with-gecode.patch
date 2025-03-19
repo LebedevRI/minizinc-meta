@@ -1,7 +1,7 @@
-From 7ad526f9a23da2108c218a3fb3effb58ac35a0e3 Mon Sep 17 00:00:00 2001
+From f794ce2107adbc8c1c3766dcfe5b0d52718df696 Mon Sep 17 00:00:00 2001
 From: Roman Lebedev <lebedev.ri@gmail.com>
 Date: Thu, 22 Aug 2024 23:47:37 +0300
-Subject: [PATCH 3/9] `test-globals-float.mzn`: does not work with gecode
+Subject: [PATCH 03/10] `test-globals-float.mzn`: does not work with gecode
 
 See https://github.com/MiniZinc/libminizinc/issues/835
 See https://github.com/Gecode/gecode/issues/199
@@ -19,5 +19,5 @@ index bb3bb1874..8b7e2b209 100644
  - !Result
    solution: !Solution
 -- 
-2.47.2
+2.49.0
 
