@@ -1,9 +1,9 @@
 #!/usr/bin/make -f
 
+export DH_VERBOSE=1
+
 include /usr/share/dpkg/architecture.mk
 include /usr/share/dpkg/pkg-info.mk
-
-export DH_VERBOSE=1
 
 NUMJOBS = 1
 ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
@@ -75,6 +75,8 @@ ifneq (,$(filter nopgo,$(DEB_BUILD_OPTIONS)))
 	WITH_PGO = OFF
 endif
 
+WITH_PGO = OFF
+
 export CC = clang-$(LLVM_VERSION)
 export CXX = clang++-$(LLVM_VERSION)
 
@@ -99,6 +101,18 @@ _CFLAGS += $(STAGE_COMPILE_FLAGS)
 ifneq ($(WITH_LLD),OFF)
 	_LDFLAGS += -fuse-ld=lld-$(LLVM_VERSION) -Wl,--build-id=sha1
 endif
+
+# Bolt
+_LDFLAGS += -Wl,--emit-relocs
+_LDFLAGS += -Wl,-znow
+BOLT_OPT :=
+# BOLT_OPT += -split-functions
+# BOLT_OPT += -split-strategy=cdsplit
+# BOLT_OPT += -reorder-functions=cdsort
+# BOLT_OPT += -reorder-blocks=ext-tsp
+# BOLT_OPT += -jump-tables=split
+# BOLT_OPT += -icf=all
+# BOLT_OPT += -update-debug-sections
 
 export CFLAGS = $(_CFLAGS)
 export LDFLAGS = $(_LDFLAGS)
@@ -311,6 +325,29 @@ perform_stage_build:
 override_dh_auto_configure:
 	# Nothing to do. Because of multi-stage build, everything happens in override_dh_auto_build.
 
+perform_bolt_optimization:
+	rm -rf $(PROFILE_TMP_DIR)
+	mkdir -p $(PROFILE_TMP_DIR)
+	cd $(INSTALL_DIR)/usr/bin && find . -type f -not -name '*.orig' \
+		-exec cp '{}' '{}.orig' ';' \
+		-exec echo Instrumenting '{}' ';' \
+		-exec llvm-bolt-$(LLVM_VERSION) '{}.orig' -o '{}' --instrument --instrumentation-file=$(PROFILE_TMP_DIR)/'{}'-prof.fdata --instrumentation-file-append-pid ';' \
+	;
+	$(MAKE) -f debian/rules test_minizinc_late
+	mkdir -p $(PROFILE_DIR)
+	cd $(INSTALL_DIR)/usr/bin && find . -type f -not -name '*.orig' \
+		-exec echo Merging prof.fdata for '{}' ';' \
+		-exec merge-fdata-21 -o $(PROFILE_DIR)/'{}'-prof.fdata $(PROFILE_TMP_DIR)/'{}'-prof.*.fdata \
+	;
+	rm -rf $(PROFILE_TMP_DIR)
+	exit 1
+	cd $(INSTALL_DIR)/usr/bin && find . -type f -not -name '*.orig' \
+		-exec echo Bolt-optimizing '{}' ';' \
+		-exec llvm-bolt-$(LLVM_VERSION) '{}.orig' -o '{}' -data=$(PROFILE_DIR)/'{}'-prof.fdata $(BOLT_OPT) ';' \
+		-exec rm '{}.orig' ';' \
+	;
+	$(MAKE) -f debian/rules test_minizinc_late
+
 perform_multistage_build:
 ifneq ($(WITH_PGO),OFF)
 	BUILD_STAGE=0 STAGE_COMPILE_FLAGS="-fprofile-generate -fprofile-update=atomic -Xclang -mllvm -Xclang -vp-counters-per-site=10.0" $(MAKE) -f debian/rules perform_stage_build
@@ -329,6 +366,7 @@ ifneq ($(WITH_PGO),OFF)
 else
 	$(MAKE) -f debian/rules perform_stage_build
 endif
+	$(MAKE) -f debian/rules perform_bolt_optimization
 	$(MAKE) -f debian/rules build_minizincide
 
 override_dh_auto_build:

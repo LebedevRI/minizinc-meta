@@ -2,7 +2,9 @@ Source: minizinc-meta
 Section: science
 Priority: optional
 Maintainer: Roman Lebedev <lebedev.ri@gmail.com>
-Build-Depends: bison,
+Build-Depends:
+               bison,
+               bolt-21,
                clang-21,
                cmake,
                debhelper-compat (= 13),
