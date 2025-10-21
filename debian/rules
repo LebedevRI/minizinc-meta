@@ -1,9 +1,9 @@
 #!/usr/bin/make -f
 
+export DH_VERBOSE=1
+
 include /usr/share/dpkg/architecture.mk
 include /usr/share/dpkg/pkg-info.mk
-
-export DH_VERBOSE=1
 
 NUMJOBS = 1
 ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
@@ -51,11 +51,13 @@ LLVM_VERSION = 21
 WITH_LTO = OFF
 WITH_TESTS = ON
 WITH_PGO = OFF
+WITH_BOLT = OFF
 WITH_LLD = ON
 
 ifeq ($(DEB_HOST_ARCH),amd64)
 	WITH_LTO = ON
 	WITH_PGO = ON
+	WITH_BOLT = ON
 endif
 
 ifneq (,$(filter nolto,$(DEB_BUILD_OPTIONS)))
@@ -68,11 +70,18 @@ ifneq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	WITH_TESTS = OFF
 	# If we aren't allowed to run tests, then certainly no PGO either.
 	WITH_PGO = OFF
+	WITH_BOLT = OFF
 endif
 
 ifneq (,$(filter nopgo,$(DEB_BUILD_OPTIONS)))
 	# Respect nopgo.
 	WITH_PGO = OFF
+	WITH_BOLT = OFF
+endif
+
+ifneq (,$(filter nobolt,$(DEB_BUILD_OPTIONS)))
+	# Respect nopgo.
+	WITH_BOLT = OFF
 endif
 
 export CC = clang-$(LLVM_VERSION)
@@ -100,6 +109,19 @@ ifneq ($(WITH_LLD),OFF)
 	_LDFLAGS += -fuse-ld=lld-$(LLVM_VERSION) -Wl,--build-id=sha1
 endif
 
+# NOTE: always apply bolt-specific link flags.
+_LDFLAGS += -Wl,--emit-relocs
+_LDFLAGS += -Wl,-znow
+BOLT_OPT :=
+BOLT_OPT += -split-functions
+BOLT_OPT += -split-strategy=cdsplit
+BOLT_OPT += -split-all-cold
+BOLT_OPT += -reorder-functions=cdsort
+BOLT_OPT += -reorder-blocks=ext-tsp
+BOLT_OPT += -jump-tables=split
+BOLT_OPT += -icf=all
+# BOLT_OPT += -update-debug-sections
+
 export CFLAGS = $(_CFLAGS)
 export LDFLAGS = $(_LDFLAGS)
 export CXXFLAGS = $(CFLAGS)
@@ -112,6 +134,7 @@ endif
 
 PROFILE_DIR = $(BUILDSPACE)/profile
 PROFILE_TMP_DIR = $(PROFILE_DIR)/raw
+BOLT_PROFILE_TMP_DIR = $(PROFILE_DIR)/bolt-raw
 PROFILE = $(PROFILE_DIR)/default.profdata
 
 BUILD_DIR_PREFIX = $(BUILDSPACE)/build
@@ -228,7 +251,8 @@ perform_stage_build_minizinc:
 	rm -rf $(BUILD_DIR)
 
 ifneq ($(WITH_TESTS),OFF)
-test_minizinc_internal_late:
+# NOTE: this runs after perform_stage_build_minizinc_python!
+test_minizinc_internal_solvers_late:
 	# Many test failures when using gecode_presolver,
 	# so still use external gecode.
 	for b in fzn-chuffed mzn-gecode; do \
@@ -240,7 +264,12 @@ test_minizinc_internal_late:
 # 	cp $(INSTALL_DIR)/usr/share/minizinc/solvers-orig/gecode_internal.msc $(INSTALL_DIR)/usr/share/minizinc/solvers/
 	cp $(INSTALL_DIR)/usr/share/minizinc/solvers-orig/gecode.msc $(INSTALL_DIR)/usr/share/minizinc/solvers/
 # 	sed -i 's/"tags": \[/"tags": \["gecode", /' $(INSTALL_DIR)/usr/share/minizinc/solvers/gecode_internal.msc
-	cd $(SOURCE_DIR)/libminizinc/tests/; HOME=$(BUILD_DIR)/tmphome PATH="$(PATH):$(INSTALL_DIR)/usr/bin" PYTHONPATH="$(PYTHONPATH):$(INSTALL_DIR)/usr/lib/$(PYTHON3_VERSION)/dist-packages/" pytest --all-suites --solvers chuffed,gecode -n $(NUMJOBS)
+	for solver in chuffed gecode; do \
+		cd $(SOURCE_DIR)/libminizinc/tests/; HOME=$(BUILD_DIR)/tmphome PATH="$(PATH):$(INSTALL_DIR)/usr/bin" PYTHONPATH="$(PYTHONPATH):$(INSTALL_DIR)/usr/lib/$(PYTHON3_VERSION)/dist-packages/" pytest --all-suites --solvers $$solver -n $(NUMJOBS); \
+		if [ "$(WITH_BOLT)" != "OFF" ]; then \
+			cd $(SOURCE_DIR); $(MAKE) -f debian/rules merge_bolt_prof_fdata; \
+		fi; \
+	done
 	rm -rf $(INSTALL_DIR)/usr/share/minizinc/solvers/
 	mv $(INSTALL_DIR)/usr/share/minizinc/solvers-orig $(INSTALL_DIR)/usr/share/minizinc/solvers
 	for b in fzn-chuffed mzn-gecode; do \
@@ -248,17 +277,28 @@ test_minizinc_internal_late:
 	done
 endif
 
-# NOTE: this runs after perform_stage_build_minizinc_python!
 ifneq ($(WITH_TESTS),OFF)
-test_minizinc_normal_late:
-	cd $(SOURCE_DIR)/libminizinc/tests/; PATH="$(PATH):$(INSTALL_DIR)/usr/bin" PYTHONPATH="$(PYTHONPATH):$(INSTALL_DIR)/usr/lib/$(PYTHON3_VERSION)/dist-packages/" pytest --all-suites --solvers chuffed,gecode -n $(NUMJOBS)
+# NOTE: this runs after perform_stage_build_minizinc_python!
+test_minizinc_external_solvers_late:
+	mkdir $(INSTALL_DIR)/usr/share/minizinc/solvers-orig
+	mv $(INSTALL_DIR)/usr/share/minizinc/solvers/* $(INSTALL_DIR)/usr/share/minizinc/solvers-orig/
+	cp $(INSTALL_DIR)/usr/share/minizinc/solvers-orig/chuffed.msc $(INSTALL_DIR)/usr/share/minizinc/solvers/
+	cp $(INSTALL_DIR)/usr/share/minizinc/solvers-orig/gecode.msc $(INSTALL_DIR)/usr/share/minizinc/solvers/
+	for solver in chuffed gecode; do \
+		cd $(SOURCE_DIR)/libminizinc/tests/; PATH="$(PATH):$(INSTALL_DIR)/usr/bin" PYTHONPATH="$(PYTHONPATH):$(INSTALL_DIR)/usr/lib/$(PYTHON3_VERSION)/dist-packages/" pytest --all-suites --solvers $$solver -n $(NUMJOBS); \
+		if [ "$(WITH_BOLT)" != "OFF" ]; then \
+			cd $(SOURCE_DIR); $(MAKE) -f debian/rules merge_bolt_prof_fdata; \
+		fi; \
+	done
+	rm -rf $(INSTALL_DIR)/usr/share/minizinc/solvers/
+	mv $(INSTALL_DIR)/usr/share/minizinc/solvers-orig $(INSTALL_DIR)/usr/share/minizinc/solvers
 endif
 
 # NOTE: this runs after perform_stage_build_minizinc_python!
 ifneq ($(WITH_TESTS),OFF)
 test_minizinc_late:
-	$(MAKE) -f debian/rules test_minizinc_internal_late
-	$(MAKE) -f debian/rules test_minizinc_normal_late
+	$(MAKE) -f debian/rules test_minizinc_internal_solvers_late
+	$(MAKE) -f debian/rules test_minizinc_external_solvers_late
 endif
 
 build_minizincide:
@@ -306,10 +346,76 @@ ifneq ($(WITH_TESTS),OFF)
 endif
 
 perform_stage_build:
-	LLVM_PROFILE_FILE="$(PROFILE_TMP_DIR)/stage-$(BUILD_STAGE)-%$(NUM_PROFILE_FILES)m.profraw" $(MAKE) -f debian/rules perform_stage_build_impl
+	DEB_BUILD_OPTIONS="$(DEB_BUILD_OPTIONS) nobolt" LLVM_PROFILE_FILE="$(PROFILE_TMP_DIR)/stage-$(BUILD_STAGE)-%$(NUM_PROFILE_FILES)m.profraw" $(MAKE) -f debian/rules perform_stage_build_impl
 
 override_dh_auto_configure:
 	# Nothing to do. Because of multi-stage build, everything happens in override_dh_auto_build.
+
+ifneq ($(WITH_BOLT),OFF)
+merge_bolt_prof_fdata:
+	find $(BOLT_PROFILE_TMP_DIR) -type d -empty -delete
+	mkdir -p $(PROFILE_DIR)
+	cd $(INSTALL_DIR)/usr/bin && find . -type f -print0 | xargs --null -I'{}' sh -c "                   \
+		if [ ! -f '.{}.instrumented' ]; then                                                        \
+			exit;                                                                               \
+		fi;                                                                                         \
+		echo 'Merging prof.fdata for {}';                                                           \
+		if [ ! -d $(BOLT_PROFILE_TMP_DIR)/'{}' ]; then                                              \
+			echo 'No profiles - skipping';                                                      \
+			exit 0;                                                                             \
+		fi;                                                                                         \
+		if [ -f $(PROFILE_DIR)/'{}'-prof.fdata ]; then                                              \
+			mv $(PROFILE_DIR)/'{}'-prof.fdata $(BOLT_PROFILE_TMP_DIR)/'{}'/prof.base.fdata;     \
+		fi;                                                                                         \
+		merge-fdata-$(LLVM_VERSION) -o $(PROFILE_DIR)/'{}'-prof.fdata $(BOLT_PROFILE_TMP_DIR)/'{}'; \
+		rm -rf $(BOLT_PROFILE_TMP_DIR)/'{}';                                                        \
+		mkdir -p $(BOLT_PROFILE_TMP_DIR)/'{}';                                                      \
+	" ';'
+endif
+
+ifneq ($(WITH_BOLT),OFF)
+perform_bolt_optimization:
+	rm -rf $(BOLT_PROFILE_TMP_DIR)
+	cd $(INSTALL_DIR)/usr/bin && find . -type f                                                         \
+		-not -name '*.orig' -not -name '*.instrumented' -print0                                     \
+	| xargs --null -I'{}' sh -c "                                                                       \
+		set -e;                                                                                     \
+		echo 'Instrumenting {}';                                                                    \
+		mv '{}' '{}.orig';                                                                          \
+		mkdir -p $(BOLT_PROFILE_TMP_DIR)/'{}';                                                      \
+		(llvm-bolt-$(LLVM_VERSION)                                                                  \
+			'{}.orig'                                                                           \
+			-o '{}'                                                                             \
+			--instrument                                                                        \
+			--instrumentation-file=$(BOLT_PROFILE_TMP_DIR)/'{}'/prof                            \
+			--instrumentation-file-append-pid                                                   \
+		&& touch '.{}.instrumented') || mv '{}.orig' '{}';                                          \
+	" ';'
+	$(MAKE) -f debian/rules test_minizinc_late
+	# Profiles are merged in test_minizinc_late
+	cd $(INSTALL_DIR)/usr/bin && find . -type f -print0 | xargs --null -I'{}' sh -c "                   \
+		if [ ! -f '.{}.instrumented' ]; then                                                        \
+			exit;                                                                               \
+		fi;                                                                                         \
+		rm '.{}.instrumented';                                                                      \
+		rm '{}';                                                                                    \
+		echo 'Bolt-optimizing {}';                                                                  \
+		if [ ! -f $(PROFILE_DIR)/'{}'-prof.fdata ]; then                                            \
+			echo 'No profile - not optimizing';                                                 \
+			mv '{}.orig' '{}';                                                                  \
+		else                                                                                        \
+			llvm-bolt-$(LLVM_VERSION)                                                           \
+				'{}.orig'                                                                   \
+				-o '{}'                                                                     \
+				-data=$(PROFILE_DIR)/'{}'-prof.fdata                                        \
+				--print-profile-stats                                                       \
+				--dyno-stats                                                                \
+				$(BOLT_OPT);                                                                \
+		fi;                                                                                         \
+		rm -f '{}.orig';                                                                            \
+	" ';'
+	DEB_BUILD_OPTIONS="$(DEB_BUILD_OPTIONS) nobolt" $(MAKE) -f debian/rules test_minizinc_late
+endif
 
 perform_multistage_build:
 ifneq ($(WITH_PGO),OFF)
@@ -328,6 +434,9 @@ ifneq ($(WITH_PGO),OFF)
 	STAGE_COMPILE_FLAGS="-fprofile-use=$(PROFILE)" $(MAKE) -f debian/rules perform_stage_build
 else
 	$(MAKE) -f debian/rules perform_stage_build
+endif
+ifneq ($(WITH_BOLT),OFF)
+	$(MAKE) -f debian/rules perform_bolt_optimization
 endif
 	$(MAKE) -f debian/rules build_minizincide
 

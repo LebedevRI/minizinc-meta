@@ -2,7 +2,9 @@ Source: minizinc-meta
 Section: science
 Priority: optional
 Maintainer: Roman Lebedev <lebedev.ri@gmail.com>
-Build-Depends: bison,
+Build-Depends:
+               bison,
+               bolt-21,
                clang-21,
                cmake,
                debhelper-compat (= 13),
@@ -229,12 +231,12 @@ Description: free and open-source constraint modelling language.
  library of pre-defined constraints. Your model is then compiled into FlatZinc,
  a solver input language that is understood by a wide range of solvers.
 
-#Package: python3-pytest-html
-#Homepage: https://github.com/pytest-dev/pytest-html
-#Section: python
-#Architecture: any
-#Depends: ${shlibs:Depends}, ${misc:Depends},
-#         python3:any,
-#         python3-pytest
-#Description: plugin for pytest that generates a HTML report for test results
-# pytest-html is a plugin for pytest that generates a HTML report for test results.
+# Package: python3-pytest-html
+# Homepage: https://github.com/pytest-dev/pytest-html
+# Section: python
+# Architecture: any
+# Depends: ${shlibs:Depends}, ${misc:Depends},
+#          python3:any,
+#          python3-pytest
+# Description: plugin for pytest that generates a HTML report for test results
+#  pytest-html is a plugin for pytest that generates a HTML report for test results.
