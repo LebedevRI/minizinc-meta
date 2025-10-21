@@ -1,3 +1,9 @@
+minizinc-meta (1.0.3-mzn1) UNRELEASED; urgency=medium
+
+  * MiniZinc 2.9.4
+
+ -- Roman Lebedev <lebedev.ri@gmail.com>  Tue, 21 Oct 2025 07:49:17 +0300
+
 minizinc-meta (1.0.2-mzn2) unstable; urgency=medium
 
   * `-march=native` and stuff

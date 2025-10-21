@@ -5,10 +5,10 @@
 Versions:
 * `chuffed`: `0.13.2` (`2016f7eb7943a86b9ce93bb70b821d701667a5ca`)
 * `gecode`: `release/6.3.0` branch commit (`f7f0d7c273d6844698f01cec8229ebe0b66a016a`, aka `release-6.2.0-204-gf7f0d7c27`)
-* `libminizinc`: `2.9.2` (`83e59432fef41a67b653898b24db37488b63df06`)
+* `libminizinc`: `2.9.4` (`09a95c0d19f0430f5d34679cd8a208012d417de2`)
 * `minizinc-python`: `0.10.0` (`2db41dd125ca98fee712ddb3d6436c2eca98d2fc`)
 * `pytest-html`: `4.1.1` (`cfd32d08488e2c6fb72f0617db94ab41d3fca8d0`)
-* `MiniZincIDE`: `2.9.2` (`5dcfd43612519fd30c8b44eb0163667f83e30958`)
+* `MiniZincIDE`: `2.9.4` (`b8b2753f94eb348a5bb563e004dbc403d838ac40`)
 
 Usage workflow:
 ```
@@ -26,11 +26,11 @@ Adding `libminizinc` submodule/subproject:
 ```
 git remote add libminizinc https://github.com/MiniZinc/libminizinc.git
 git fetch --all --prune
-git tag libminizinc/2.9.2 83e59432fef41a67b653898b24db37488b63df06
+git tag libminizinc/2.9.4 09a95c0d19f0430f5d34679cd8a208012d417de2
 git -c protocol.file.allow=always submodule add --name libminizinc --reference ./ -- ./ libminizinc
 git submodule sync
 git submodule foreach 'cd .. && git submodule set-url $sm_path `pwd`'
-cd libminizinc && git fetch --all -p && git checkout -f libminizinc/2.9.2 && cd ..
+cd libminizinc && git fetch --all -p && git checkout -f libminizinc/2.9.4 && cd ..
 ```
 
 Adding `minizinc-python` submodule/subproject:
@@ -82,15 +82,15 @@ Adding `MiniZincIDE` submodule/subproject:
 ```
 git remote add MiniZincIDE https://github.com/MiniZinc/MiniZincIDE.git
 git fetch --all --prune
-git tag MiniZincIDE/2.9.2 5dcfd43612519fd30c8b44eb0163667f83e30958
+git tag MiniZincIDE/2.9.4 b8b2753f94eb348a5bb563e004dbc403d838ac40
 git -c protocol.file.allow=always submodule add --name MiniZincIDE --reference ./ -- ./ MiniZincIDE
 git submodule sync
 git submodule foreach 'cd .. && git submodule set-url $sm_path `pwd`'
-cd MiniZincIDE && git fetch --all -p && git checkout -f MiniZincIDE/2.9.2 && cd ..
+cd MiniZincIDE && git fetch --all -p && git checkout -f MiniZincIDE/2.9.4 && cd ..
 ```
 
 `git format-patch -p gecode/6.2.0+20240315150732+git204+gf7f0d7c27..gecode/pq --src-prefix=a/gecode/ --dst-prefix=b/gecode/ --output-directory=../debian/patches/gecode/`
-`git format-patch -p libminizinc/2.9.2..libminizinc/pq --src-prefix=a/libminizinc/ --dst-prefix=b/libminizinc/ --output-directory=../debian/patches/libminizinc/`
+`git format-patch -p libminizinc/2.9.4..libminizinc/pq --src-prefix=a/libminizinc/ --dst-prefix=b/libminizinc/ --output-directory=../debian/patches/libminizinc/`
 `git format-patch -p minizinc-python/0.10.0..minizinc-python/pq --src-prefix=a/minizinc-python/ --dst-prefix=b/minizinc-python/ --output-directory=../debian/patches/minizinc-python/`
 `git format-patch -p pytest-html/4.1.1..pytest-html/pq --src-prefix=a/pytest-html/ --dst-prefix=b/pytest-html/ --output-directory=../debian/patches/pytest-html/`
 `git diff -p -U99999 0.13.2 --src-prefix=a/chuffed/ --dst-prefix=b/chuffed/ > ../debian/patches/0001-chuffed-fix-cmake.patch`
